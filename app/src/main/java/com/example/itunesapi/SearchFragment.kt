@@ -48,14 +48,26 @@ class SearchFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = AlbumAdapter(albumList) { album ->
-            mediaPlayer?.release()
+            // mediaPlayer?.release()
+            // mediaPlayer = MediaPlayer().apply {
+            //     setDataSource(album.songUrl)
+            //     prepare()
+            //     start()
+            // }
 
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(album.songUrl)
-                prepare()
-                start()
+            // 1) 노래 선택 정보를 Bundle로 만든다
+            val resultBundle = Bundle().apply {
+                putString("songTitle", album.title)
+                putString("songUrl", album.songUrl)
             }
+
+            // 2) FragmentResult 로 선택 이벤트 전달
+            parentFragmentManager.setFragmentResult("songSelected", resultBundle)
+
+            // 3) 선택 후 이전 프래그먼트(FocusTimerFragment)로 돌아가기
+            parentFragmentManager.popBackStack()
         }
+
         recyclerView.adapter = adapter
 
         button.setOnClickListener {
