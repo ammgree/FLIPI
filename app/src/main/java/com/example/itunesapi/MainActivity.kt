@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         navTimer.setOnClickListener {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, FocusModeFragment())  // 너가 만든 프래그먼트로 연결
+                .replace(R.id.fragment_container, FocusModeFragment())
                 .addToBackStack(null)
                 .commit()
         }

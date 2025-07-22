@@ -126,11 +126,6 @@ class FocusTimerFragment : Fragment() {
             updatePlayPauseButton()
         }
 
-        btnMusic.setOnClickListener {
-            val intent = Intent(requireContext(), MusicLibraryActivity::class.java)
-            musicLauncher.launch(intent)
-        }
-
         btnPrevSong.setOnClickListener {
             // 이전곡 기능 구현 예정
         }
