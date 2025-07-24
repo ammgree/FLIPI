@@ -14,7 +14,7 @@ import com.bumptech.glide.Glide
 class Album (val title: String, val artist: String, val album: String,
              var imageUrl: String, val songUrl : String)
 
-class AlbumAdapter(private val albumList: List<Album> // 전체 앨범 목록
+class AlbumAdapter(private val albumList: List<Album> // 검색 결과 앨범 목록
     , private val onItemClick: (Album) -> Unit) // 클릭했을 때 할 동작
     //adapter 외부(Activity나 Fragment)에서 람다 형태로 클릭 동작을 넘길 수 있게 함
     : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder>() {

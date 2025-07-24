@@ -43,12 +43,21 @@ class MainActivity : AppCompatActivity() {
                 .commit()
         }
 
-        // <규리> 검색버튼 연결하겠습니다
+        // <규리>검색버튼 연결하겠습니다
         val searchButton = findViewById<ImageButton>(R.id.nav_search)
 
-        searchButton.setOnClickListener{
+        searchButton.setOnClickListener {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, SearchFragment())
+                .commit()
+        }
+
+        // 보관함 버튼
+        val storeButton = findViewById<ImageButton>(R.id.nav_store)
+
+        storeButton.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, StoreFragment())
                 .commit()
         }
     }

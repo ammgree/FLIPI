@@ -19,16 +19,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [SearchFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SearchFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
@@ -55,6 +45,7 @@ class SearchFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         addButton = view.findViewById<ImageButton>(R.id.addbutton)
 
+        // 이 albumList는 검색결과로 나오는 노래들
         adapter = AlbumAdapter(albumList) { album ->
             adapter.selectAlbum(album)
             addButton.visibility = View.VISIBLE
