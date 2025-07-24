@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -48,6 +50,7 @@ class SearchFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = AlbumAdapter(albumList) { album ->
+            adapter.selectAlbum(album)
             mediaPlayer?.release()
 
             mediaPlayer = MediaPlayer().apply {
@@ -89,6 +92,8 @@ class SearchFragment : Fragment() {
             }.start()
         }
     }
+
+
     private fun makeMap(urls:String) : Map<String, Album>{
         //URL 객체로 만들기
         val url = URL(urls)

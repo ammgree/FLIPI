@@ -31,35 +31,35 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="home" />
+            android:text="@string/nav_home" />
 
         <Button
             android:id="@+id/nav_search"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="search" />
+            android:text="@string/nav_search" />
 
         <Button
             android:id="@+id/nav_timer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="timer" />
+            android:text="@string/nav_timer" />
 
         <Button
             android:id="@+id/nav_store"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="store" />
+            android:text="@string/nav_store" />
 
         <Button
             android:id="@+id/nav_daily"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="daily" />
+            android:text="@string/nav_daily" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
