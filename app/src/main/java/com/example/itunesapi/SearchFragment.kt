@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONObject
@@ -16,22 +17,16 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [SearchFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SearchFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: AlbumAdapter
+    // 검색해서 나올 노래 리스트
     private val albumList = mutableListOf<Album>()
+    // 내 플레이리스트
+    val playList = mutableListOf<Album>()
     private var mediaPlayer : MediaPlayer? = null
+    lateinit var addButton : ImageButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,28 +41,32 @@ class SearchFragment : Fragment() {
         val editText = view.findViewById<EditText>(R.id.searchEditText)
         recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        addButton = view.findViewById<ImageButton>(R.id.addbutton)
 
+        // 이 albumList는 검색결과로 나오는 노래들
         adapter = AlbumAdapter(albumList) { album ->
-            // mediaPlayer?.release()
-            // mediaPlayer = MediaPlayer().apply {
-            //     setDataSource(album.songUrl)
-            //     prepare()
-            //     start()
-            // }
+            adapter.selectAlbum(album)
+            addButton.visibility = View.VISIBLE
 
-            // 1) 노래 선택 정보를 Bundle로 만든다
-            val resultBundle = Bundle().apply {
-                putString("songTitle", album.title)
-                putString("songUrl", album.songUrl)
+            mediaPlayer?.release()
+
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(adapter.selectedAlbum?.songUrl)
+                prepare()
+                start()
+                // 1) 노래 선택 정보를 Bundle로 만든다
+                val resultBundle = Bundle().apply {
+                    putString("songTitle", album.title)
+                    putString("songUrl", album.songUrl)
+                }
+
+                // 2) FragmentResult 로 선택 이벤트 전달
+                parentFragmentManager.setFragmentResult("songSelected", resultBundle)
+
+                // 3) 선택 후 이전 프래그먼트(FocusTimerFragment)로 돌아가기
+                parentFragmentManager.popBackStack()
             }
-
-            // 2) FragmentResult 로 선택 이벤트 전달
-            parentFragmentManager.setFragmentResult("songSelected", resultBundle)
-
-            // 3) 선택 후 이전 프래그먼트(FocusTimerFragment)로 돌아가기
-            parentFragmentManager.popBackStack()
         }
-
         recyclerView.adapter = adapter
 
         button.setOnClickListener {
@@ -100,7 +99,15 @@ class SearchFragment : Fragment() {
                 }
             }.start()
         }
+
+        addButton.setOnClickListener {
+            val song = adapter.selectedAlbum
+            if(song != null)
+                playList.add(song)
+        }
     }
+
+
     private fun makeMap(urls:String) : Map<String, Album>{
         //URL 객체로 만들기
         val url = URL(urls)

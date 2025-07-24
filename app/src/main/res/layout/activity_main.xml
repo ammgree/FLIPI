@@ -21,46 +21,63 @@
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:orientation="horizontal"
+        android:background="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/fragment_container">
 
-        <Button
+        <ImageButton
             android:id="@+id/nav_home"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="home" />
+            android:src="@drawable/home"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="#FFFFFF"
+            android:contentDescription="홈" />
 
-        <Button
+        <ImageButton
             android:id="@+id/nav_search"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="search" />
+            android:src="@drawable/search"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="#FFFFFF"
+            android:contentDescription="검색" />
 
-        <Button
+        <ImageButton
             android:id="@+id/nav_timer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="timer" />
+            android:src="@drawable/ic_timer"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="#FFFFFF"
+            android:contentDescription="타이머" />
 
-        <Button
+        <ImageButton
             android:id="@+id/nav_store"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="store" />
+            android:src="@drawable/menu_gallery"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="#FFFFFF"
+            android:contentDescription="상점" />
 
-        <Button
+        <ImageButton
             android:id="@+id/nav_daily"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="daily" />
+            android:src="@drawable/baseline_calendar_today_24"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="#FFFFFF"
+            android:contentDescription="일기" />
     </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
