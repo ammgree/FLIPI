@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/storeFragment">
+
+    <fragment
+        android:id="@+id/storeFragment"
+        android:name="com.example.itunesapi.StoreFragment"
+        android:label="StoreFragment">
+        <action
+            android:id="@+id/action_store_to_editPlaylist"
+            app:destination="@id/editPlaylistFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editPlaylistFragment"
+        android:name="com.example.itunesapi.EditPlaylistFragment"
+        android:label="Edit Playlist" >
+        <argument android:name="title" app:argType="string" />
+        <argument android:name="picture" app:argType="string" />
+    </fragment>
+</navigation>

@@ -8,9 +8,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-
-class Playlist(val title : String, val picture : String)
-//플리 모음에서는 사진과 제목만 알면 되니까
+import com.example.itunesapi.Playlist
 
 class PlaylistAdapter(
     private val playlist: List<Playlist>,
