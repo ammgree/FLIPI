@@ -39,9 +39,9 @@ class AlbumAdapter(private val albumList: List<Album> // 전체 앨범 목록
                 .into(albumArt)
 
             if (album == selectedAlbum)
-                item.setBackgroundColor(Color.LTGRAY)
+                item.setBackgroundColor(Color.DKGRAY)
             else
-                item.setBackgroundColor(Color.WHITE)
+                item.setBackgroundColor(Color.BLACK)
             // 아이템 클릭하면 onClick 실행
             itemView.setOnClickListener {
                 onClick(album)
