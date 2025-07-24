@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONObject
@@ -32,8 +33,12 @@ class SearchFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: AlbumAdapter
+    // 검색해서 나올 노래 리스트
     private val albumList = mutableListOf<Album>()
+    // 내 플레이리스트
+    val playList = mutableListOf<Album>()
     private var mediaPlayer : MediaPlayer? = null
+    lateinit var addButton : ImageButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,13 +53,16 @@ class SearchFragment : Fragment() {
         val editText = view.findViewById<EditText>(R.id.searchEditText)
         recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        addButton = view.findViewById<ImageButton>(R.id.addbutton)
 
         adapter = AlbumAdapter(albumList) { album ->
             adapter.selectAlbum(album)
+            addButton.visibility = View.VISIBLE
+
             mediaPlayer?.release()
 
             mediaPlayer = MediaPlayer().apply {
-                setDataSource(album.songUrl)
+                setDataSource(adapter.selectedAlbum?.songUrl)
                 prepare()
                 start()
             }
@@ -90,6 +98,12 @@ class SearchFragment : Fragment() {
                     Log.e("iTunesAPI", "오류 발생: $e")
                 }
             }.start()
+        }
+
+        addButton.setOnClickListener {
+            val song = adapter.selectedAlbum
+            if(song != null)
+                playList.add(song)
         }
     }
 
