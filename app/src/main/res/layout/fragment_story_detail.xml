@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/storyDetailLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <ImageView
+        android:id="@+id/albumImageView"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center_horizontal"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/songTitleTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="제목"
+        android:textSize="34sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/artistTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="아티스트"
+        android:textSize="24sp" />
+
+    <!-- 반응 이모지 버튼 -->
+    <LinearLayout
+        android:id="@+id/reactionButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="16dp">
+
+        <ImageButton
+            android:id="@+id/buttonHappy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/very_satisfied"
+            android:contentDescription="좋아요"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="16dp" />
+
+        <ImageButton
+            android:id="@+id/buttonNeutral"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/neutral"
+            android:contentDescription="그냥 그래요"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="16dp" />
+
+        <ImageButton
+            android:id="@+id/buttonSad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/dissatisfied"
+            android:contentDescription="별로"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="16dp" />
+    </LinearLayout>
+</LinearLayout>
+
+
