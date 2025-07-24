@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -56,6 +54,17 @@ class SearchFragment : Fragment() {
                 setDataSource(adapter.selectedAlbum?.songUrl)
                 prepare()
                 start()
+                // 1) 노래 선택 정보를 Bundle로 만든다
+                val resultBundle = Bundle().apply {
+                    putString("songTitle", album.title)
+                    putString("songUrl", album.songUrl)
+                }
+
+                // 2) FragmentResult 로 선택 이벤트 전달
+                parentFragmentManager.setFragmentResult("songSelected", resultBundle)
+
+                // 3) 선택 후 이전 프래그먼트(FocusTimerFragment)로 돌아가기
+                parentFragmentManager.popBackStack()
             }
         }
         recyclerView.adapter = adapter
