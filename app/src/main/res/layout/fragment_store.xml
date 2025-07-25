@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/store"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="16dp"
+    tools:context=".StoreFragment">
+
+    <!-- 유튜브 URL 입력창 -->
+    <EditText
+        android:id="@+id/youtubeUrlEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="유튜브 URL 입력"
+        android:textColorHint="#888888"
+        android:textColor="#FFFFFF"
+        android:padding="10dp"
+        android:inputType="textUri"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/youtubeButton"
+        app:layout_constraintHorizontal_bias="0" />
+
+    <!-- 유튜브 연결 버튼 -->
+    <ImageButton
+        android:id="@+id/youtubeButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="링크 연결"
+        android:src="@drawable/play_arroow"
+        app:tint="#FFFFFF"
+        app:layout_constraintTop_toTopOf="@id/youtubeUrlEditText"
+        app:layout_constraintBottom_toBottomOf="@id/youtubeUrlEditText"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 플레이리스트 목록 텍스트 -->
+    <TextView
+        android:id="@+id/searchTitleText"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="플레이리스트 목록"
+    android:textColor="#FFFFFF"
+    android:textSize="20sp"
+    android:textStyle="bold"
+    android:layout_marginTop="16dp"
+    app:layout_constraintTop_toBottomOf="@id/youtubeUrlEditText"
+    app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 플레이리스트 RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/storeView"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="16dp"
+    android:background="@color/black"
+    app:layout_constraintTop_toBottomOf="@id/searchTitleText"
+    app:layout_constraintBottom_toTopOf="@id/addPlaylist"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 빈 플레이리스트 추가 버튼 -->
+    <ImageButton
+        android:id="@+id/addPlaylist"
+    android:layout_width="30dp"
+    android:layout_height="30dp"
+    android:src="@drawable/baseline_add_24"
+    android:background="?attr/selectableItemBackgroundBorderless"
+    android:contentDescription="플레이리스트 추가"
+    app:tint="#FFFFFF"
+    android:layout_marginBottom="8dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
