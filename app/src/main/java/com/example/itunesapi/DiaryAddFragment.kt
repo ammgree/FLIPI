@@ -11,6 +11,13 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Switch
 import android.widget.Toast
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import com.google.firebase.firestore.FirebaseFirestore
+import com.example.itunesapi.DiaryItem
+import java.util.*
+
 
 
 class DiaryAddFragment : Fragment() {
@@ -25,6 +32,10 @@ class DiaryAddFragment : Fragment() {
         val editContent = view.findViewById<EditText>(R.id.editContent)
         val btnSave = view.findViewById<ImageButton>(R.id.btnSave)
         val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
+        val switch = view.findViewById<Switch>(R.id.switchVisibility)
+        val isPublic = view.findViewById<Switch>(R.id.switchVisibility)
+
+
 
 
 
@@ -32,15 +43,31 @@ class DiaryAddFragment : Fragment() {
         bottomNav?.visibility = View.GONE
 
         btnSave.setOnClickListener {
-            val title = editTitle.text.toString()
-            val content = editContent.text.toString()
+            val title = editTitle.text.toString().trim()
+            val content = editContent.text.toString().trim()
+            val isPublic = switch.isChecked
 
+            if (title.isEmpty() || content.isEmpty()) {
+                Toast.makeText(context, "제목과 내용을 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-            Toast.makeText(context, "저장 완료: $title", Toast.LENGTH_SHORT).show()
+            val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            val diary = DiaryItem(title = title, content = content, date = date, isPublic = isPublic)
 
-            // 뒤로 가기
-            parentFragmentManager.popBackStack()
+            FirebaseFirestore.getInstance().collection("diaries")
+                .add(diary)
+                .addOnSuccessListener {
+                    Toast.makeText(context, "일기 저장 완료!", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(context, "저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
         }
+
+
+
 
         btnBack.setOnClickListener {
             // 다이얼로그로 확인 받고 이동
@@ -55,7 +82,7 @@ class DiaryAddFragment : Fragment() {
                 .show()
         }
 
-        val switch = view.findViewById<Switch>(R.id.switchVisibility)
+
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             switch.text = if (isChecked) "공개" else "비공개"
