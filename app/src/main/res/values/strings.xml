@@ -9,4 +9,7 @@
     <string name="nav_timer">timer</string>
     <string name="nav_store">store</string>
     <string name="nav_daily">daily</string>
+
+    <string name="title_explain">Feel your mood, Flip your vibe</string>
+    <string name="title_register"><u>회원가입</u></string>
 </resources>
