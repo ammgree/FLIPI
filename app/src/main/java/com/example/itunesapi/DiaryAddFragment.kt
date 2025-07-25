@@ -1,6 +1,9 @@
 package com.example.itunesapi
 
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,8 +12,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.Switch
+import android.widget.TextView
 import android.widget.Toast
+import com.bumptech.glide.Glide
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -22,25 +28,50 @@ import java.util.*
 
 class DiaryAddFragment : Fragment() {
 
+    private lateinit var musicTitleTextView: TextView
+    private lateinit var musicImageView: ImageView
+    private var selectedMusicUrl: String? = null
+    private var selectedMusicArtist: String? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_diary_add, container, false)
 
+        val btnMusic = view.findViewById<ImageButton>(R.id.btnMusic)
+        val bottomNav = activity?.findViewById<View>(R.id.navigationBar)
+        bottomNav?.visibility = View.GONE
+
+        btnMusic.setOnClickListener {
+            val fragment = SearchFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean("fromDiaryAdd", true)
+                }
+            }
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        musicTitleTextView = view.findViewById(R.id.musicTitleTextView)
+        musicImageView = view.findViewById(R.id.musicImageView)
         val editTitle = view.findViewById<EditText>(R.id.editTitle)
         val editContent = view.findViewById<EditText>(R.id.editContent)
         val btnSave = view.findViewById<ImageButton>(R.id.btnSave)
         val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
         val switch = view.findViewById<Switch>(R.id.switchVisibility)
-        val isPublic = view.findViewById<Switch>(R.id.switchVisibility)
 
-
-
-
-
-        val bottomNav = activity?.findViewById<View>(R.id.navigationBar)
-        bottomNav?.visibility = View.GONE
+        switch.setOnCheckedChangeListener { _, isChecked ->
+            switch.text = if (isChecked) "공개" else "비공개"
+        }
 
         btnSave.setOnClickListener {
             val title = editTitle.text.toString().trim()
@@ -53,12 +84,22 @@ class DiaryAddFragment : Fragment() {
             }
 
             val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-            val diary = DiaryItem(title = title, content = content, date = date, isPublic = isPublic)
+            val diary = DiaryItem(
+                title = title,
+                content = content,
+                date = date,
+                isPublic = isPublic,
+                musicTitle = musicTitleTextView.text.toString().split(" | ").firstOrNull() ?: "",
+                musicArtist = selectedMusicArtist,
+                musicImageUrl = musicImageView.tag as? String ?: "",
+                musicUrl = selectedMusicUrl ?: ""
+            )
 
             FirebaseFirestore.getInstance().collection("diaries")
                 .add(diary)
                 .addOnSuccessListener {
                     Toast.makeText(context, "일기 저장 완료!", Toast.LENGTH_SHORT).show()
+                    MusicPlayerManager.stop() // ✅ 저장 성공 후 음악 정지
                     parentFragmentManager.popBackStack()
                 }
                 .addOnFailureListener { e ->
@@ -66,38 +107,37 @@ class DiaryAddFragment : Fragment() {
                 }
         }
 
-
-
-
         btnBack.setOnClickListener {
-            // 다이얼로그로 확인 받고 이동
             AlertDialog.Builder(requireContext())
                 .setTitle("알림")
                 .setMessage("일기 작성 화면에서 나가시겠습니까?")
                 .setPositiveButton("네") { _, _ ->
-                    // 이전 프래그먼트로 이동
+                    MusicPlayerManager.stop() // ✅ 뒤로가기 시 음악 정지
                     parentFragmentManager.popBackStack()
                 }
                 .setNegativeButton("아니요", null)
                 .show()
         }
 
+        parentFragmentManager.setFragmentResultListener("songSelected", viewLifecycleOwner) { _, bundle ->
+            val songTitle = bundle.getString("songTitle") ?: ""
+            val songUrl = bundle.getString("songUrl")
+            val songArtist = bundle.getString("songArtist") ?: ""
+            val albumImage = bundle.getString("albumImage")
 
+            musicTitleTextView.text = "$songTitle | $songArtist"
+            musicTitleTextView.visibility = View.VISIBLE
 
-        switch.setOnCheckedChangeListener { _, isChecked ->
-            switch.text = if (isChecked) "공개" else "비공개"
+            musicImageView.tag = albumImage
+            musicImageView.visibility = View.GONE
+            selectedMusicUrl = songUrl
+            selectedMusicArtist = songArtist
         }
-
-        return view
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-
-        // 하단 바 다시 보이기
-        val navBar = activity?.findViewById<View>(R.id.navigationBar)
-        navBar?.visibility = View.VISIBLE
+        MusicPlayerManager.stop() // ✅ 프래그먼트 종료 시 음악 정지
+        activity?.findViewById<View>(R.id.navigationBar)?.visibility = View.VISIBLE
     }
-
-
 }

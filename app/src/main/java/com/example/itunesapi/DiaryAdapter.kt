@@ -11,7 +11,8 @@ import com.bumptech.glide.Glide
 
 class DiaryAdapter(
     private val diaryList: List<DiaryItem>,
-    private val onItemClick: (DiaryItem) -> Unit
+    private val onItemClick: (DiaryItem) -> Unit,
+    private val onItemLongClick: (DiaryItem) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -27,7 +28,7 @@ class DiaryAdapter(
 
         fun bind(item: DiaryItem) {
             Glide.with(itemView.context)
-                .load(item.imageUrl)
+                .load(item.musicImageUrl)
                 .into(diaryImage)
 
             diaryTitle.text = item.title
@@ -37,7 +38,12 @@ class DiaryAdapter(
             itemView.setOnClickListener {
                 onItemClick(item)
             }
+            itemView.setOnLongClickListener {
+                onItemLongClick(item)
+                true
+            }
         }
+
 
     }
 
@@ -75,9 +81,10 @@ class DiaryAdapter(
         if (holder is DiaryViewHolder && position < diaryList.size) {
             val item = diaryList[position]
             Log.d("DiaryAdapter", "title=${item.title}, isPublic=${item.isPublic}")
-            holder.bind(item)
+            holder.bind(item)  // 모든 처리는 bind()에서!
         }
     }
+
 
 
     override fun getItemCount(): Int = diaryList.size + 1

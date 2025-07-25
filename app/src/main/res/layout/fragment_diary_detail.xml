@@ -78,6 +78,40 @@
             android:layout_marginTop="10dp"
             android:background="#FFB6E1" />
 
+        <!-- 노래 제목 | 가수 -->
+        <LinearLayout
+            android:id="@+id/layoutMusicInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textMusicTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="노래 제목"
+                android:textColor="#FFB6E1"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" | "
+                android:textColor="#FFB6E1"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/textMusicArtist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="가수"
+                android:textColor="#FFB6E1"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+
         <!-- 내용 -->
         <TextView
             android:id="@+id/textContent"

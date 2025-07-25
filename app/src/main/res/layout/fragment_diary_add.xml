@@ -122,6 +122,32 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textTitle" />
 
+    <!-- 노래 제목 -->
+    <TextView
+        android:id="@+id/musicTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/titleUnderline"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp" />
+
+    <!-- 앨범 이미지 -->
+    <ImageView
+        android:id="@+id/musicImageView"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/musicTitleTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"/>
+
+
     <EditText
         android:id="@+id/editContent"
         android:layout_width="0dp"
@@ -133,9 +159,10 @@
         android:gravity="top|start"
         android:inputType="textMultiLine"
         android:minLines="10"
-        app:layout_constraintTop_toBottomOf="@id/titleUnderline"
+        app:layout_constraintTop_toBottomOf="@id/musicImageView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="16dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
