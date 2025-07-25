@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 
@@ -32,7 +33,11 @@ class DiaryFragment : Fragment() {
     }
 
     private fun loadDiaries() {
-        FirebaseFirestore.getInstance().collection("diaries")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        FirebaseFirestore.getInstance().collection("users")
+            .document(userId)
+            .collection("diaries")
             .get()
             .addOnSuccessListener { result ->
                 val diaryList = mutableListOf<DiaryItem>()
@@ -58,6 +63,8 @@ class DiaryFragment : Fragment() {
                             .setMessage("「${diaryItem.title}」을(를) 삭제하시겠습니까?")
                             .setPositiveButton("삭제") { _, _ ->
                                 FirebaseFirestore.getInstance()
+                                    .collection("users")
+                                    .document(userId)
                                     .collection("diaries")
                                     .whereEqualTo("title", diaryItem.title)
                                     .whereEqualTo("date", diaryItem.date)
@@ -65,6 +72,8 @@ class DiaryFragment : Fragment() {
                                     .addOnSuccessListener { result ->
                                         for (document in result) {
                                             FirebaseFirestore.getInstance()
+                                                .collection("users")
+                                                .document(userId)
                                                 .collection("diaries")
                                                 .document(document.id)
                                                 .delete()

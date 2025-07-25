@@ -22,6 +22,7 @@ import java.util.Date
 import java.util.Locale
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.itunesapi.DiaryItem
+import com.google.firebase.auth.FirebaseAuth
 import java.util.*
 
 
@@ -32,6 +33,7 @@ class DiaryAddFragment : Fragment() {
     private lateinit var musicImageView: ImageView
     private var selectedMusicUrl: String? = null
     private var selectedMusicArtist: String? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,6 +70,7 @@ class DiaryAddFragment : Fragment() {
         val btnSave = view.findViewById<ImageButton>(R.id.btnSave)
         val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
         val switch = view.findViewById<Switch>(R.id.switchVisibility)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             switch.text = if (isChecked) "공개" else "비공개"
@@ -95,16 +98,20 @@ class DiaryAddFragment : Fragment() {
                 musicUrl = selectedMusicUrl ?: ""
             )
 
-            FirebaseFirestore.getInstance().collection("diaries")
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(userId)
+                .collection("diaries")
                 .add(diary)
                 .addOnSuccessListener {
                     Toast.makeText(context, "일기 저장 완료!", Toast.LENGTH_SHORT).show()
-                    MusicPlayerManager.stop() // ✅ 저장 성공 후 음악 정지
+                    MusicPlayerManager.stop() // 저장 성공 후 음악 정지
                     parentFragmentManager.popBackStack()
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(context, "저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
+
         }
 
         btnBack.setOnClickListener {
@@ -112,7 +119,7 @@ class DiaryAddFragment : Fragment() {
                 .setTitle("알림")
                 .setMessage("일기 작성 화면에서 나가시겠습니까?")
                 .setPositiveButton("네") { _, _ ->
-                    MusicPlayerManager.stop() // ✅ 뒤로가기 시 음악 정지
+                    MusicPlayerManager.stop() //  뒤로가기 시 음악 정지
                     parentFragmentManager.popBackStack()
                 }
                 .setNegativeButton("아니요", null)
@@ -137,7 +144,7 @@ class DiaryAddFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        MusicPlayerManager.stop() // ✅ 프래그먼트 종료 시 음악 정지
+        MusicPlayerManager.stop() // 프래그먼트 종료 시 음악 정지
         activity?.findViewById<View>(R.id.navigationBar)?.visibility = View.VISIBLE
     }
 }
