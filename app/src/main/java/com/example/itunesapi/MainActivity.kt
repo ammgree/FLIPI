@@ -24,15 +24,6 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        val navTimer = findViewById<ImageButton>(R.id.nav_timer)
-
-        navTimer.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, FocusModeFragment())
-                .addToBackStack(null)
-                .commit()
-        }
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -68,6 +59,25 @@ class MainActivity : AppCompatActivity() {
         storeButton.setOnClickListener {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, StoreFragment())
+                .commit()
+        }
+
+        // 타이머 버튼
+        val navTimer = findViewById<ImageButton>(R.id.nav_timer)
+
+        navTimer.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, FocusModeFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        // 홈 버튼
+        val navHome = findViewById<ImageButton>(R.id.nav_home)
+
+        navHome.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, HomeFragment())
                 .commit()
         }
     }
