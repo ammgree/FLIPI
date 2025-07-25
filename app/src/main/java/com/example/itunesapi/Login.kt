@@ -2,6 +2,7 @@ package com.example.itunesapi
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
@@ -21,9 +22,10 @@ class Login : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("LoginActivity", "Login onCreate 호출됨")
         setContentView(R.layout.activity_login)
 
-        auth = FirebaseAuth.getInstance()//firebase에서 인스턴스 가져오기
+        auth = FirebaseAuth.getInstance() //firebase에서 인스턴스 가져오기
 
         //회원가입
         regButton = findViewById(R.id.logReg)

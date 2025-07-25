@@ -5,39 +5,53 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.w3c.dom.Text
-import java.util.ArrayList
+
+data class StoryItem(
+    val title: String,
+    val artist: String,
+    val albumArtUrl: String
+)
 
 class HomeFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: FriendAdapter
+    private lateinit var storyRecyclerView: RecyclerView
+
+    // 임시 데이터 (예시)
+    private val storyList = mutableListOf(
+        StoryItem("노래1", "아티스트1", "https://url-to-album-art1.jpg"),
+        StoryItem("노래2", "아티스트2", "https://url-to-album-art2.jpg"),
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
-// 에러나서 주석햇움
-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        recyclerView = view.findViewById<RecyclerView>(R.id.friend)
-//        val textView = view.findViewById<TextView>(R.id.textPlaylist)
-//        recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-//        recyclerView.adapter = adapter
-//
-//        fun bind(playlist: ArrayList<>(), onClick : ())
-//    }
 
-    private fun recoPlaylist() {
-        val imageView = ImageView(requireContext())
-        view?.findViewById<LinearLayout>(R.id.songPlaylist)?.addView(imageView)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        storyRecyclerView = view.findViewById(R.id.storyRecyclerView)
+        storyRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
+        storyRecyclerView.adapter = StoryAdapter(storyList) { storyItem ->
+            // 클릭된 StoryItem 데이터를 번들로 담아서 StoryDetailFragment로 이동
+            val detailFragment = StoryDetailFragment().apply {
+                arguments = Bundle().apply {
+                    putString("songTitle", storyItem.title)
+                    putString("artistName", storyItem.artist)
+                    putString("albumArtUrl", storyItem.albumArtUrl)
+                }
+            }
+
+            // fragment_container는 액티비티에 있는 프래그먼트를 담는 FrameLayout id임
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, detailFragment)
+                .addToBackStack(null) // 뒤로가기 가능하도록
+                .commit()
+        }
     }
 }
