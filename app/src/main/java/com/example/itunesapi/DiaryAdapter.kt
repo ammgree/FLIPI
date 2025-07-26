@@ -12,7 +12,8 @@ import com.bumptech.glide.Glide
 class DiaryAdapter(
     private val diaryList: List<DiaryItem>,
     private val onItemClick: (DiaryItem) -> Unit,
-    private val onItemLongClick: (DiaryItem) -> Unit
+    private val onItemLongClick: (DiaryItem) -> Unit,
+    private val isProfile: Boolean = false  // ← 추가
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -63,9 +64,7 @@ class DiaryAdapter(
     }
 
 
-    override fun getItemViewType(position: Int): Int {
-        return if (position == diaryList.size) VIEW_TYPE_ADD else VIEW_TYPE_ITEM
-    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == VIEW_TYPE_ITEM) {
@@ -87,5 +86,16 @@ class DiaryAdapter(
 
 
 
-    override fun getItemCount(): Int = diaryList.size + 1
+    override fun getItemCount(): Int {
+        return if (isProfile) {
+            diaryList.size  // 추가하기 버튼 안 넣음
+        } else {
+            diaryList.size + 1  // 마지막에 추가하기 버튼 포함
+        }
+    }
+
+
+    override fun getItemViewType(position: Int): Int {
+        return if (!isProfile && position == diaryList.size) VIEW_TYPE_ADD else VIEW_TYPE_ITEM
+    }
 }

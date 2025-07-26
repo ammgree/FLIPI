@@ -1,12 +1,17 @@
 package com.example.itunesapi
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 data class StoryItem(
     val title: String,
@@ -34,11 +39,10 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 1. 리사이클러뷰 초기화
         storyRecyclerView = view.findViewById(R.id.storyRecyclerView)
         storyRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-
         storyRecyclerView.adapter = StoryAdapter(storyList) { storyItem ->
-            // 클릭된 StoryItem 데이터를 번들로 담아서 StoryDetailFragment로 이동
             val detailFragment = StoryDetailFragment().apply {
                 arguments = Bundle().apply {
                     putString("songTitle", storyItem.title)
@@ -46,12 +50,38 @@ class HomeFragment : Fragment() {
                     putString("albumArtUrl", storyItem.albumArtUrl)
                 }
             }
-
-            // fragment_container는 액티비티에 있는 프래그먼트를 담는 FrameLayout id임
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, detailFragment)
-                .addToBackStack(null) // 뒤로가기 가능하도록
+                .addToBackStack(null)
                 .commit()
         }
+
+        // 2. 프로필 이미지 불러오기
+        val profileImageView = view.findViewById<ImageView>(R.id.profileImageView)
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val db = FirebaseFirestore.getInstance()
+
+        if (uid != null) {
+            db.collection("users").document(uid).get().addOnSuccessListener { document ->
+                val imageUrl = document.getString("profileImageUrl")
+                if (!imageUrl.isNullOrEmpty()) {
+                    Glide.with(this)
+                        .load(imageUrl)
+                        .circleCrop()
+                        .into(profileImageView)
+                }
+            }
+        }
+
+        profileImageView.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, ProfileFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        activity?.findViewById<View>(R.id.navigationBar)?.visibility = View.VISIBLE
+
     }
+
 }
