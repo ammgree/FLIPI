@@ -9,22 +9,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
 class StoryAdapter(
-    private val items: List<StoryItem>,
+    private val stories: List<StoryItem>,
     private val onItemClick: (StoryItem) -> Unit
 ) : RecyclerView.Adapter<StoryAdapter.StoryViewHolder>() {
 
     inner class StoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val albumImage: ImageView = itemView.findViewById(R.id.albumImageView)
-        private val titleText: TextView = itemView.findViewById(R.id.titleTextView)
-        private val artistText: TextView = itemView.findViewById(R.id.artistTextView)
+        val titleText: TextView = itemView.findViewById(R.id.titleTextView)
+        val artistText: TextView = itemView.findViewById(R.id.artistTextView)
+        val albumImage: ImageView = itemView.findViewById(R.id.albumImageView)
 
-        fun bind(item: StoryItem) {
-            titleText.text = item.title
-            artistText.text = item.artist
-            Glide.with(itemView.context).load(item.albumArtUrl).into(albumImage)
-
+        init {
             itemView.setOnClickListener {
-                onItemClick(item)
+                onItemClick(stories[adapterPosition])
             }
         }
     }
@@ -35,8 +31,11 @@ class StoryAdapter(
     }
 
     override fun onBindViewHolder(holder: StoryViewHolder, position: Int) {
-        holder.bind(items[position])
+        val story = stories[position]
+        holder.titleText.text = story.title
+        holder.artistText.text = story.artist
+        Glide.with(holder.itemView.context).load(story.albumArtUrl).into(holder.albumImage)
     }
 
-    override fun getItemCount() = items.size
+    override fun getItemCount(): Int = stories.size
 }
