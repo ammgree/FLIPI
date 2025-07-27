@@ -1,0 +1,65 @@
+package com.example.itunesapi
+
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.Toast
+import com.bumptech.glide.Glide
+
+class EditPlaylistFragment : Fragment() {
+
+    private lateinit var titleEditText: EditText
+    private lateinit var imageView: ImageView
+    private lateinit var saveButton: Button
+    val mysongPlaylist = Playlist("", "")
+
+
+    private lateinit var song : Album
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        song = arguments?.getParcelable("album")!!
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_edit_playlist, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        titleEditText = view.findViewById(R.id.titleEditText)
+        imageView = view.findViewById(R.id.imageView)
+        saveButton = view.findViewById(R.id.saveButton)
+
+        Glide.with(requireContext()).load(song.imageUrl).into(imageView)
+
+        saveButton.setOnClickListener {
+            val newTitle = titleEditText.text.toString()
+            val resultBundle = Bundle().apply {
+                putString("newPlaylistTitle", newTitle)
+            }
+            parentFragmentManager.setFragmentResult("newPlaylist",resultBundle)
+            requireActivity().supportFragmentManager.popBackStack()
+            mysongPlaylist.title = newTitle
+            mysongPlaylist.picture = song.imageUrl
+            mysongPlaylist.songs.add(song)
+
+            val mainActivity = requireActivity() as MainActivity
+            mainActivity.playLists.add(0, mysongPlaylist)
+
+            Toast.makeText(requireContext(), "플리 제목을 '$newTitle'로 변경했습니다!", Toast.LENGTH_SHORT).show()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, StoreFragment())
+                .commit()
+        }
+    }
+}

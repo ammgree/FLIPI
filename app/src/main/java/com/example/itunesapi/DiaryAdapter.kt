@@ -1,5 +1,6 @@
 package com.example.itunesapi
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,9 @@ import com.bumptech.glide.Glide
 
 class DiaryAdapter(
     private val diaryList: List<DiaryItem>,
-    private val onItemClick: (DiaryItem) -> Unit
+    private val onItemClick: (DiaryItem) -> Unit,
+    private val onItemLongClick: (DiaryItem) -> Unit,
+    private val isProfile: Boolean = false  // ← 추가
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -26,33 +29,42 @@ class DiaryAdapter(
 
         fun bind(item: DiaryItem) {
             Glide.with(itemView.context)
-                .load(item.imageUrl)
+                .load(item.musicImageUrl)
                 .into(diaryImage)
 
             diaryTitle.text = item.title
-            diaryDate.text = item.date
+            diaryDate.text = if (item.date.isNotBlank()) item.date else "날짜 없음"
             diaryPublic.text = if (item.isPublic) "공개" else "비공개"
 
             itemView.setOnClickListener {
                 onItemClick(item)
             }
+            itemView.setOnLongClickListener {
+                onItemLongClick(item)
+                true
+            }
         }
+
+
     }
 
     inner class AddViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val addText: TextView = itemView.findViewById(R.id.addText)
-
         init {
             itemView.setOnClickListener {
-
-                onItemClick(DiaryItem("", "추가하기", "", false))
+                // "추가하기" 레이아웃 클릭 시 다이어리 작성 화면으로 이동
+                val context = itemView.context
+                if (context is MainActivity) {  // MainActivity는 너 프로젝트에 맞게 바꿔줘!
+                    context.supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, DiaryAddFragment())
+                        .addToBackStack(null)
+                        .commit()
+                }
             }
         }
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (position == diaryList.size) VIEW_TYPE_ADD else VIEW_TYPE_ITEM
-    }
+
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == VIEW_TYPE_ITEM) {
@@ -65,10 +77,25 @@ class DiaryAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is DiaryViewHolder) {
-            holder.bind(diaryList[position])
+        if (holder is DiaryViewHolder && position < diaryList.size) {
+            val item = diaryList[position]
+            Log.d("DiaryAdapter", "title=${item.title}, isPublic=${item.isPublic}")
+            holder.bind(item)  // 모든 처리는 bind()에서!
         }
     }
 
-    override fun getItemCount(): Int = diaryList.size + 1
+
+
+    override fun getItemCount(): Int {
+        return if (isProfile) {
+            diaryList.size  // 추가하기 버튼 안 넣음
+        } else {
+            diaryList.size + 1  // 마지막에 추가하기 버튼 포함
+        }
+    }
+
+
+    override fun getItemViewType(position: Int): Int {
+        return if (!isProfile && position == diaryList.size) VIEW_TYPE_ADD else VIEW_TYPE_ITEM
+    }
 }

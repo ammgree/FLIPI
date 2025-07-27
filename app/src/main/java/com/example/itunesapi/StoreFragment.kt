@@ -1,42 +1,81 @@
 package com.example.itunesapi
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 
 class StoreFragment : Fragment() {
 
     private lateinit var storeRecyclerView: RecyclerView
-    private lateinit var storeAdapter: PlaylistAdapter
-    private lateinit var storeList : List<Playlist>
+    private lateinit var adapter: PlaylistAdapter
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_store, container, false)
+        val mainActivity = requireActivity() as MainActivity
 
+        // 뷰 바인딩
+        val addButton = view.findViewById<ImageButton>(R.id.addPlaylist)
+        val youtubeButton = view.findViewById<ImageButton>(R.id.youtubeButton)
         storeRecyclerView = view.findViewById(R.id.storeView)
-        storeRecyclerView.layoutManager = LinearLayoutManager(context)
 
-        // 일단 예시
-        storeList = listOf(
-            Playlist(
-                title = "플리제목",
-                picture = "https://example.com/image1.jpg"
-            )
-        )
-        storeAdapter = PlaylistAdapter(storeList) {
-            Toast.makeText(requireContext(), "${storeList[0].title} 클릭됨", Toast.LENGTH_SHORT).show()
+        storeRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        // 어댑터 설정
+        adapter = PlaylistAdapter(mainActivity.playLists) { selectedPlaylist ->
+            Toast.makeText(requireContext(), "${selectedPlaylist.title} 클릭됨", Toast.LENGTH_SHORT).show()
         }
-        storeRecyclerView.adapter = storeAdapter
+        storeRecyclerView.adapter = adapter
+
+        // "+" 버튼 클릭 시 빈 플레이리스트 추가
+        addButton.setOnClickListener {
+            // 다이얼로그로 제목 입력 받기
+            val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            builder.setTitle("새 플레이리스트 생성")
+
+            val input = android.widget.EditText(requireContext())
+            input.hint = "플레이리스트 제목 입력"
+            builder.setView(input)
+
+            builder.setPositiveButton("추가") { dialog, _ ->
+                val title = input.text.toString().ifBlank { "이름 없는 플레이리스트" }
+                val imageUrl = "https://picsum.photos/300/200?random=${System.currentTimeMillis()}" // 랜덤 이미지
+                val newPlaylist = Playlist(title, imageUrl)
+
+                mainActivity.playLists.add(0, newPlaylist) // 최신순 맨 위로
+                adapter.notifyItemInserted(0)
+                storeRecyclerView.scrollToPosition(0)
+
+                dialog.dismiss()
+            }
+
+            builder.setNegativeButton("취소") { dialog, _ -> dialog.cancel() }
+
+            builder.show()
+        }
+
+        // 유튜브 버튼 눌렀을 때 동작 (검색 화면으로 이동할 수 있음)
+        youtubeButton.setOnClickListener {
+            Toast.makeText(requireContext(), "YouTube 검색창으로 이동", Toast.LENGTH_SHORT).show()
+            // TODO: 유튜브 검색 화면으로 이동
+        }
+
+
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
     }
 }

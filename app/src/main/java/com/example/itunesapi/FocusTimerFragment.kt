@@ -29,7 +29,6 @@ class FocusTimerFragment : Fragment() {
     private lateinit var btnStart: Button
     private lateinit var btnStop: Button
 
-    // 음악 관련 변수
     private var mediaPlayer: MediaPlayer? = null
     private var currentSongUrl: String? = null
     private var currentSongTitle: String? = null
@@ -42,8 +41,6 @@ class FocusTimerFragment : Fragment() {
     private lateinit var btnMusic: Button
 
     companion object {
-        private const val MUSIC_LIBRARY_REQUEST_CODE = 1001
-
         fun newInstance(topic: String): FocusTimerFragment {
             val fragment = FocusTimerFragment()
             val args = Bundle()
@@ -52,6 +49,7 @@ class FocusTimerFragment : Fragment() {
             return fragment
         }
     }
+
     private val musicLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -62,12 +60,14 @@ class FocusTimerFragment : Fragment() {
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         topic = arguments?.getString("topic")
         viewModel = ViewModelProvider(requireActivity())[TimerViewModel::class.java]
         handler = Handler(Looper.getMainLooper())
+
+        // 🔁 타이머 저장값 복원
+        viewModel.loadTimersFromPrefs(requireContext())
     }
 
     override fun onCreateView(
@@ -81,7 +81,6 @@ class FocusTimerFragment : Fragment() {
         btnStart = view.findViewById(R.id.btnStart)
         btnStop = view.findViewById(R.id.btnStop)
 
-        // 음악 UI 초기화
         tvCurrentSong = view.findViewById(R.id.tvCurrentMusicTitle)
         btnPlayPause = view.findViewById(R.id.btnPlayPause)
         btnPrevSong = view.findViewById(R.id.btnPrev)
@@ -137,13 +136,16 @@ class FocusTimerFragment : Fragment() {
         return view
     }
 
+    override fun onStop() {
+        super.onStop()
+        viewModel.saveTimersToPrefs(requireContext())
+    }
 
     override fun onDestroy() {
         super.onDestroy()
         mediaPlayer?.release()
         mediaPlayer = null
 
-        // 타이머 분 단위로 저장
         topic?.let {
             val minutes = secondsPassed / 60
             viewModel.updateTime(it, minutes)
@@ -174,7 +176,5 @@ class FocusTimerFragment : Fragment() {
         return String.format("%02d:%02d", minutes, remainingSeconds)
     }
 }
-
-
 
 

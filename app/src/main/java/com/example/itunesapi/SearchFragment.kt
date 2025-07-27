@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.PopupMenu
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONObject
@@ -23,16 +25,17 @@ class SearchFragment : Fragment() {
     private lateinit var adapter: AlbumAdapter
     // 검색해서 나올 노래 리스트
     private val albumList = mutableListOf<Album>()
-    // 내 플레이리스트
-    val playList = mutableListOf<Album>()
     private var mediaPlayer : MediaPlayer? = null
     lateinit var addButton : ImageButton
+    private var fromDiaryAdd: Boolean = false
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+        fromDiaryAdd = arguments?.getBoolean("fromDiaryAdd", false) == true
         return inflater.inflate(R.layout.fragment_search, container, false)
     }
 
@@ -48,25 +51,23 @@ class SearchFragment : Fragment() {
             adapter.selectAlbum(album)
             addButton.visibility = View.VISIBLE
 
-            mediaPlayer?.release()
+            // <도연>싱글톤으로 음악 재생 자세한 내용은 MusicPlayerManager가셔서 보시면 됩니다
+            // ✅ 싱글톤으로 음악 재생
+            adapter.selectedAlbum?.songUrl?.let { MusicPlayerManager.play(it) }
 
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(adapter.selectedAlbum?.songUrl)
-                prepare()
-                start()
-                // 1) 노래 선택 정보를 Bundle로 만든다
+            if (fromDiaryAdd) {
+                // ✨ 일기 작성화면에서 왔을 때는 결과 전달 후 돌아가기
                 val resultBundle = Bundle().apply {
                     putString("songTitle", album.title)
+                    putString("songArtist", album.artist)
                     putString("songUrl", album.songUrl)
+                    putString("albumImage", album.imageUrl)
                 }
-
-                // 2) FragmentResult 로 선택 이벤트 전달
                 parentFragmentManager.setFragmentResult("songSelected", resultBundle)
-
-                // 3) 선택 후 이전 프래그먼트(FocusTimerFragment)로 돌아가기
                 parentFragmentManager.popBackStack()
             }
         }
+
         recyclerView.adapter = adapter
 
         button.setOnClickListener {
@@ -100,12 +101,43 @@ class SearchFragment : Fragment() {
             }.start()
         }
 
-        addButton.setOnClickListener {
-            val song = adapter.selectedAlbum
-            if(song != null)
-                playList.add(song)
+        addButton.setOnClickListener { view ->
+            val popup = PopupMenu(requireContext(), view)
+            popup.menuInflater.inflate(R.menu.add_song, popup.menu)
+
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+//                    R.id.menu_add-> {
+//                        val song = adapter.selectedAlbum
+//                        if (song != null) {
+//                            playList.add(song)
+//                            Toast.makeText(requireContext(), "선택한 노래 추가됨", Toast.LENGTH_SHORT).show()
+//                        }
+//                        true
+//                    }
+                    R.id.menu_add_new -> {
+                        val songBundle = Bundle().apply {
+                            putParcelable("album", adapter.selectedAlbum)
+                        }
+
+                        val fragment = EditPlaylistFragment().apply {
+                            arguments = songBundle
+                        }
+
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            popup.show()
         }
     }
+
 
 
     private fun makeMap(urls:String) : Map<String, Album>{
@@ -141,4 +173,6 @@ class SearchFragment : Fragment() {
         }
         return madeMap
     }
+
+
 }

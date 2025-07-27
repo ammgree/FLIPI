@@ -1,37 +1,18 @@
 package com.example.itunesapi
 
-import android.media.MediaPlayer
 import android.os.Bundle
-import android.util.Log
-import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageButton
-import androidx.activity.enableEdgeToEdge
+
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import org.json.JSONObject
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
 
 class MainActivity : AppCompatActivity() {
+    val playLists = mutableListOf<Playlist>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
         setContentView(R.layout.activity_main)
-
-        val navTimer = findViewById<ImageButton>(R.id.nav_timer)
-
-        navTimer.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, FocusModeFragment())
-                .addToBackStack(null)
-                .commit()
-        }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -68,6 +49,25 @@ class MainActivity : AppCompatActivity() {
         storeButton.setOnClickListener {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, StoreFragment())
+                .commit()
+        }
+
+        // 타이머 버튼
+        val navTimer = findViewById<ImageButton>(R.id.nav_timer)
+
+        navTimer.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, FocusModeFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        // 홈 버튼
+        val navHome = findViewById<ImageButton>(R.id.nav_home)
+
+        navHome.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, HomeFragment())
                 .commit()
         }
     }

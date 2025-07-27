@@ -2,9 +2,12 @@
 package com.example.itunesapi
 
 data class DiaryItem(
-    val imageUrl: String,
-    val title: String,
-    val date: String,
-    val isPublic: Boolean
+    var title: String = "",
+    var content: String = "",
+    var date: String = "",
+    var isPublic: Boolean = false,
+    var musicTitle: String? = null,
+    var musicArtist: String? = null,
+    var musicImageUrl: String? = null,
+    var musicUrl: String? = null
 )
-
