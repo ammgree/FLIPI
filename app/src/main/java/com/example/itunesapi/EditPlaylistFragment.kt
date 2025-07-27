@@ -9,34 +9,21 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [EditPlaylistFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class EditPlaylistFragment : Fragment() {
 
     private lateinit var titleEditText: EditText
     private lateinit var imageView: ImageView
     private lateinit var saveButton: Button
+    val mysongPlaylist = Playlist("", "")
 
-    private var title: String? = null
-    private var imageUrl: String? = null
+
+    private lateinit var song : Album
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            title = it.getString("title")
-            imageUrl = it.getString("imageUrl")
-        }
+        song = arguments?.getParcelable("album")!!
     }
 
     override fun onCreateView(
@@ -53,13 +40,26 @@ class EditPlaylistFragment : Fragment() {
         imageView = view.findViewById(R.id.imageView)
         saveButton = view.findViewById(R.id.saveButton)
 
-        titleEditText.setText(title)
-        Glide.with(requireContext()).load(imageUrl).into(imageView)
+        Glide.with(requireContext()).load(song.imageUrl).into(imageView)
 
         saveButton.setOnClickListener {
             val newTitle = titleEditText.text.toString()
+            val resultBundle = Bundle().apply {
+                putString("newPlaylistTitle", newTitle)
+            }
+            parentFragmentManager.setFragmentResult("newPlaylist",resultBundle)
+            requireActivity().supportFragmentManager.popBackStack()
+            mysongPlaylist.title = newTitle
+            mysongPlaylist.picture = song.imageUrl
+            mysongPlaylist.songs.add(song)
+
+            val mainActivity = requireActivity() as MainActivity
+            mainActivity.playLists.add(0, mysongPlaylist)
+
             Toast.makeText(requireContext(), "플리 제목을 '$newTitle'로 변경했습니다!", Toast.LENGTH_SHORT).show()
-            findNavController().popBackStack()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, StoreFragment())
+                .commit()
         }
     }
 }
