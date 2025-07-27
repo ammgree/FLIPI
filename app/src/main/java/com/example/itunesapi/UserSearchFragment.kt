@@ -10,8 +10,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.auth.User
 
 class UserSearchFragment : Fragment() {
 
@@ -21,7 +21,7 @@ class UserSearchFragment : Fragment() {
     private lateinit var adapter: FollowUserAdapter
 
     private val userList = mutableListOf<UserItem>()
-
+    private var currentUsername: String? = null  // 현재 사용자 이름 저장용
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,19 +37,43 @@ class UserSearchFragment : Fragment() {
         searchButton = view.findViewById(R.id.searchBtn)
         resultRecyclerView = view.findViewById(R.id.resultRecyclerView)
 
-
-        adapter = FollowUserAdapter(userList) { username ->
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, OtherUserProfileFragment.newInstance(username))
-                .addToBackStack(null)
-                .commit()
+        // 로그인한 유저의 username 미리 가져오기
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+            FirebaseFirestore.getInstance().collection("users")
+                .document(currentUserUid)
+                .get()
+                .addOnSuccessListener { document ->
+                    currentUsername = document.getString("username")
+                }
         }
 
+        val backButton = view.findViewById<ImageButton>(R.id.backButton)
+        backButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
 
+        // 어댑터 한 번만 설정
+        adapter = FollowUserAdapter(userList) { clickedUsername ->
+            if (clickedUsername == currentUsername) {
+                // 본인 → ProfileFragment
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, ProfileFragment())
+                    .addToBackStack(null)
+                    .commit()
+            } else {
+                // 다른 유저 → OtherUserProfileFragment
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, OtherUserProfileFragment.newInstance(clickedUsername))
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }
 
         resultRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         resultRecyclerView.adapter = adapter
 
+        // 검색 버튼 클릭 시
         searchButton.setOnClickListener {
             val queryText = searchInput.text.toString().trim()
             if (queryText.isNotEmpty()) {

@@ -60,6 +60,12 @@ class OtherUserProfileFragment : Fragment() {
         diaryRecyclerView = view.findViewById(R.id.diaryRecyclerView)
         diaryRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        val backButton = view.findViewById<ImageButton>(R.id.backButton)
+        backButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+
         diaryAdapter = DiaryAdapter(diaryList, onItemClick = {}, onItemLongClick = {}, isProfile = true)
         diaryRecyclerView.adapter = diaryAdapter
 
@@ -70,61 +76,162 @@ class OtherUserProfileFragment : Fragment() {
         followButton.setOnClickListener {
             toggleFollow()
         }
+
+
+        db.collection("users")
+            .whereEqualTo("username", viewedUserId)
+            .get()
+            .addOnSuccessListener { result ->
+                if (!result.isEmpty) {
+                    val targetUid = result.documents[0].id
+                    updateFollowCounts(targetUid)
+                }
+            }
+
+
     }
 
     private fun loadUserInfo() {
-        db.collection("users").document(viewedUserId).get()
-            .addOnSuccessListener { doc ->
-                usernameText.text = doc.getString("username") ?: ""
-                val imageUrl = doc.getString("profileImageUrl")
-                if (!imageUrl.isNullOrEmpty()) {
-                    Glide.with(this)
-                        .load(imageUrl)
-                        .circleCrop()
-                        .into(profileImage)
-                }
-            }
-    }
-
-    private fun loadDiaryList() {
-        db.collection("users").document(viewedUserId).collection("diaries")
+        db.collection("users")
+            .whereEqualTo("username", viewedUserId)
             .get()
             .addOnSuccessListener { result ->
-                diaryList.clear()
-                for (document in result) {
-                    val diary = document.toObject(DiaryItem::class.java)
-                    diaryList.add(diary)
+                if (!result.isEmpty) {
+                    val doc = result.documents[0]
+                    usernameText.text = doc.getString("username") ?: ""
+                    val imageUrl = doc.getString("profileImageUrl")
+                    if (!imageUrl.isNullOrEmpty()) {
+                        Glide.with(this)
+                            .load(imageUrl)
+                            .circleCrop()
+                            .into(profileImage)
+                    }
                 }
-                postCountText.text = "게시물 ${diaryList.size}"
-                diaryAdapter.notifyDataSetChanged()
             }
     }
 
-    private fun checkFollowState() {
-        db.collection("users").document(currentUserId)
-            .collection("following").document(viewedUserId)
+
+    private fun loadDiaryList() {
+        db.collection("users")
+            .whereEqualTo("username", viewedUserId)
             .get()
-            .addOnSuccessListener {
-                followButton.text = if (it.exists()) "팔로잉" else "팔로우"
+            .addOnSuccessListener { result ->
+                if (!result.isEmpty) {
+                    val userDocId = result.documents[0].id
+
+                    db.collection("users")
+                        .document(userDocId)
+                        .collection("diaries")
+                        .get()
+                        .addOnSuccessListener { diaryResult ->
+                            diaryList.clear()
+                            for (document in diaryResult) {
+                                val diary = document.toObject(DiaryItem::class.java)
+                                // 👉 공개된 일기만 보여주기
+                                if (diary.isPublic == true) {
+                                    diaryList.add(diary)
+                                }
+                            }
+                            postCountText.text = "게시물 ${diaryList.size}"
+                            diaryAdapter.notifyDataSetChanged()
+                        }
+                }
+            }
+    }
+
+
+
+    private fun checkFollowState() {
+        db.collection("users")
+            .whereEqualTo("username", viewedUserId)
+            .get()
+            .addOnSuccessListener { result ->
+                if (!result.isEmpty) {
+                    val targetUid = result.documents[0].id
+
+                    db.collection("users").document(currentUserId)
+                        .collection("following").document(targetUid)
+                        .get()
+                        .addOnSuccessListener {
+                            followButton.text = if (it.exists()) "팔로잉" else "팔로우"
+                        }
+                }
             }
     }
 
     private fun toggleFollow() {
-        val followingRef = db.collection("users").document(currentUserId)
-            .collection("following").document(viewedUserId)
-        val followerRef = db.collection("users").document(viewedUserId)
-            .collection("followers").document(currentUserId)
+        db.collection("users")
+            .whereEqualTo("username", viewedUserId)
+            .get()
+            .addOnSuccessListener { result ->
+                if (!result.isEmpty) {
+                    val targetUid = result.documents[0].id
 
-        if (followButton.text == "팔로우") {
-            // 팔로우하기
-            followingRef.set(mapOf("username" to viewedUserId))
-            followerRef.set(mapOf("username" to currentUserId))
-            followButton.text = "팔로잉"
-        } else {
-            // 팔로우 해제
-            followingRef.delete()
-            followerRef.delete()
-            followButton.text = "팔로우"
-        }
+                    val followingRef = db.collection("users").document(currentUserId)
+                        .collection("following").document(targetUid)
+                    val followerRef = db.collection("users").document(targetUid)
+                        .collection("followers").document(currentUserId)
+
+                    if (followButton.text == "팔로우") {
+                        // 🔥 먼저 내 정보 가져오기
+                        db.collection("users").document(currentUserId).get()
+                            .addOnSuccessListener { currentUserDoc ->
+                                val currentUsername = currentUserDoc.getString("username") ?: ""
+                                val currentEmail = currentUserDoc.getString("email") ?: ""
+                                val currentProfileImageUrl = currentUserDoc.getString("profileImageUrl")
+
+                                // 🔥 상대 정보도 가져오기
+                                db.collection("users").document(targetUid).get()
+                                    .addOnSuccessListener { targetUserDoc ->
+                                        val targetUsername = targetUserDoc.getString("username") ?: ""
+                                        val targetEmail = targetUserDoc.getString("email") ?: ""
+                                        val targetProfileImageUrl = targetUserDoc.getString("profileImageUrl")
+
+                                        val followingData = mapOf(
+                                            "username" to targetUsername,
+                                            "email" to targetEmail,
+                                            "profileImageUrl" to targetProfileImageUrl
+                                        )
+                                        followingRef.set(followingData)
+
+                                        val followerData = mapOf(
+                                            "username" to currentUsername,
+                                            "email" to currentEmail,
+                                            "profileImageUrl" to currentProfileImageUrl
+                                        )
+                                        followerRef.set(followerData)
+
+                                        followButton.text = "팔로잉"
+                                        updateFollowCounts(viewedUserId)
+                                    }
+                            }
+                    } else {
+                        followingRef.delete()
+                        followerRef.delete()
+                        followButton.text = "팔로우"
+                        updateFollowCounts(viewedUserId)
+                    }
+                }
+            }
     }
+
+
+    private fun updateFollowCounts(userId: String) {
+        val userRef = db.collection("users").document(userId)
+
+        // followers 수
+        userRef.collection("followers").get()
+            .addOnSuccessListener { followersSnapshot ->
+                val count = followersSnapshot.size()
+                followersText.text = "팔로워 $count"
+            }
+
+        // following 수
+        userRef.collection("following").get()
+            .addOnSuccessListener { followingSnapshot ->
+                val count = followingSnapshot.size()
+                followingText.text = "팔로잉 $count"
+            }
+    }
+
 }
