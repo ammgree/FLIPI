@@ -17,7 +17,13 @@
         android:id="@+id/editPlaylistFragment"
         android:name="com.example.itunesapi.EditPlaylistFragment"
         android:label="Edit Playlist" >
-        <argument android:name="title" app:argType="string" />
-        <argument android:name="picture" app:argType="string" />
+        <argument
+            android:name="title"
+            app:argType="string"
+            android:defaultValue=""/>
+        <argument
+            android:name="picture"
+            app:argType="string"
+            android:defaultValue=""/>
     </fragment>
 </navigation>

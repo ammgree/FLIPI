@@ -15,32 +15,28 @@ import androidx.recyclerview.widget.RecyclerView
 class StoreFragment : Fragment() {
 
     private lateinit var storeRecyclerView: RecyclerView
-    private lateinit var storeAdapter: PlaylistAdapter
-    private var storeList: MutableList<Playlist> = mutableListOf()
+    private lateinit var adapter: PlaylistAdapter
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_store, container, false)
+        val mainActivity = requireActivity() as MainActivity
 
         // 뷰 바인딩
         val addButton = view.findViewById<ImageButton>(R.id.addPlaylist)
         val youtubeButton = view.findViewById<ImageButton>(R.id.youtubeButton)
-        val playlistText = view.findViewById<TextView>(R.id.searchTitleText)
         storeRecyclerView = view.findViewById(R.id.storeView)
 
         storeRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        // 초기 데이터
-        storeList.add(Playlist("예시 플리", "https://example.com/image1.jpg"))
-
         // 어댑터 설정
-        storeAdapter = PlaylistAdapter(storeList) { playlist ->
-            Toast.makeText(requireContext(), "${playlist.title} 클릭됨", Toast.LENGTH_SHORT).show()
-            // TODO: 플레이리스트 상세 페이지로 이동
+        adapter = PlaylistAdapter(mainActivity.playLists) { selectedPlaylist ->
+            Toast.makeText(requireContext(), "${selectedPlaylist.title} 클릭됨", Toast.LENGTH_SHORT).show()
         }
-        storeRecyclerView.adapter = storeAdapter
+        storeRecyclerView.adapter = adapter
 
         // "+" 버튼 클릭 시 빈 플레이리스트 추가
         addButton.setOnClickListener {
@@ -57,8 +53,8 @@ class StoreFragment : Fragment() {
                 val imageUrl = "https://picsum.photos/300/200?random=${System.currentTimeMillis()}" // 랜덤 이미지
                 val newPlaylist = Playlist(title, imageUrl)
 
-                storeList.add(0, newPlaylist) // 최신순 맨 위로
-                storeAdapter.notifyItemInserted(0)
+                mainActivity.playLists.add(0, newPlaylist) // 최신순 맨 위로
+                adapter.notifyItemInserted(0)
                 storeRecyclerView.scrollToPosition(0)
 
                 dialog.dismiss()
@@ -75,15 +71,11 @@ class StoreFragment : Fragment() {
             // TODO: 유튜브 검색 화면으로 이동
         }
 
-        storeAdapter = PlaylistAdapter(storeList) { selectedPlaylist ->
-            val action = StoreFragmentDirections.actionStoreToEditPlaylist(
-                title = selectedPlaylist.title,
-                picture = selectedPlaylist.picture  // or selectedPlaylist.imageUrl, 네이밍에 맞게
-            )
-            findNavController().navigate(action)
-        }
-
 
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
     }
 }

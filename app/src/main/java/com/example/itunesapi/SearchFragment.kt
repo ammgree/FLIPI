@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.PopupMenu
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONObject
@@ -23,8 +25,6 @@ class SearchFragment : Fragment() {
     private lateinit var adapter: AlbumAdapter
     // 검색해서 나올 노래 리스트
     private val albumList = mutableListOf<Album>()
-    // 내 플레이리스트
-    val playList = mutableListOf<Album>()
     private var mediaPlayer : MediaPlayer? = null
     lateinit var addButton : ImageButton
     private var fromDiaryAdd: Boolean = false
@@ -65,12 +65,6 @@ class SearchFragment : Fragment() {
                 }
                 parentFragmentManager.setFragmentResult("songSelected", resultBundle)
                 parentFragmentManager.popBackStack()
-            } else {
-                // ✨ 일반 Search -> 플레이리스트 화면으로 이동
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, StoreFragment())
-                    .addToBackStack(null)
-                    .commit()
             }
         }
 
@@ -107,10 +101,40 @@ class SearchFragment : Fragment() {
             }.start()
         }
 
-        addButton.setOnClickListener {
-            val song = adapter.selectedAlbum
-            if(song != null)
-                playList.add(song)
+        addButton.setOnClickListener { view ->
+            val popup = PopupMenu(requireContext(), view)
+            popup.menuInflater.inflate(R.menu.add_song, popup.menu)
+
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+//                    R.id.menu_add-> {
+//                        val song = adapter.selectedAlbum
+//                        if (song != null) {
+//                            playList.add(song)
+//                            Toast.makeText(requireContext(), "선택한 노래 추가됨", Toast.LENGTH_SHORT).show()
+//                        }
+//                        true
+//                    }
+                    R.id.menu_add_new -> {
+                        val songBundle = Bundle().apply {
+                            putParcelable("album", adapter.selectedAlbum)
+                        }
+
+                        val fragment = EditPlaylistFragment().apply {
+                            arguments = songBundle
+                        }
+
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            popup.show()
         }
     }
 
