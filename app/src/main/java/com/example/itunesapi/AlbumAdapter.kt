@@ -2,7 +2,6 @@ package com.example.itunesapi
 
 import android.graphics.Color
 import android.os.Parcelable
-import android.provider.CalendarContract.Colors
 import android.view.View
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -11,7 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Album (val title: String, val artist: String, val album: String,

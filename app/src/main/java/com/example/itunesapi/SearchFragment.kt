@@ -65,12 +65,6 @@ class SearchFragment : Fragment() {
                 }
                 parentFragmentManager.setFragmentResult("songSelected", resultBundle)
                 parentFragmentManager.popBackStack()
-            } else {
-                // ✨ 일반 Search -> 플레이리스트 화면으로 이동
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, StoreFragment())
-                    .addToBackStack(null)
-                    .commit()
             }
         }
 
