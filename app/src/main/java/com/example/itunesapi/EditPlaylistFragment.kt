@@ -25,7 +25,11 @@ class EditPlaylistFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        song = arguments?.getParcelable("album")!!
+        song = arguments?.getParcelable("album") ?: run {
+            Toast.makeText(requireContext(),"노래 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            requireActivity().supportFragmentManager.popBackStack()
+            return
+        }
     }
 
     override fun onCreateView(
@@ -74,6 +78,9 @@ class EditPlaylistFragment : Fragment() {
                 .add(playlistDTO)
                 .addOnSuccessListener {
                     Toast.makeText(requireContext(), "저장 성공!", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "저장 실패 : ${e.message}", Toast.LENGTH_SHORT).show()
                 }
 
             Toast.makeText(requireContext(), "플리 제목을 '$newTitle'로 변경했습니다!", Toast.LENGTH_SHORT).show()

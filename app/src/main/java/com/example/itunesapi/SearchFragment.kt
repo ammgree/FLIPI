@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -107,14 +108,24 @@ class SearchFragment : Fragment() {
 
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-//                    R.id.menu_add-> {
-//                        val song = adapter.selectedAlbum
-//                        if (song != null) {
-//                            playList.add(song)
-//                            Toast.makeText(requireContext(), "선택한 노래 추가됨", Toast.LENGTH_SHORT).show()
-//                        }
-//                        true
-//                    }
+                    R.id.menu_add-> {
+                        val mainActivity = requireActivity() as MainActivity
+                        mainActivity.playLists.forEachIndexed { index, playlist ->
+                            Log.d("StoreFragment", "플레이리스트[$index]: ${playlist.title}, ${playlist.picture}")
+                        }
+
+                        val playlistTitles = mainActivity.playLists.map { it.title }.toTypedArray()
+
+                        val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        builder.setTitle("플레이리스트 선택")
+                        builder.setItems(playlistTitles) { dialog, which ->
+                            val selectedPlaylist = mainActivity.playLists[which]
+                            adapter.selectedAlbum?.let { selectedPlaylist.songs.add(it) }
+                            Toast.makeText(requireContext(), "'${selectedPlaylist.title}'에 추가되었습니다!", Toast.LENGTH_SHORT).show()
+                        }
+                        builder.show()
+                        true
+                    }
                     R.id.menu_add_new -> {
                         val songBundle = Bundle().apply {
                             putParcelable("album", adapter.selectedAlbum)
