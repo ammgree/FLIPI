@@ -10,7 +10,8 @@ import com.bumptech.glide.Glide
 
 class PlaylistAdapter(
     private val playlists: List<Playlist>,
-    private val onItemClick: (Playlist) -> Unit
+    private val onItemClick: (Playlist) -> Unit,
+    private val onItemLongClick : (Playlist) -> Unit
 ) : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>() {
 
     inner class PlaylistViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -23,6 +24,11 @@ class PlaylistAdapter(
 
             itemView.setOnClickListener {
                 onItemClick(playlist)
+            }
+
+            itemView.setOnLongClickListener{
+                onItemLongClick(playlist)
+                true
             }
         }
     }

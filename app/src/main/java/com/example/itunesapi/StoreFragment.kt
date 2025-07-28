@@ -1,5 +1,6 @@
 package com.example.itunesapi
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -35,9 +36,24 @@ class StoreFragment : Fragment() {
         storeRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         // 어댑터 설정
-        adapter = PlaylistAdapter(mainActivity.playLists) { selectedPlaylist ->
+        adapter = PlaylistAdapter(mainActivity.playLists, onItemClick =  { selectedPlaylist ->
             Toast.makeText(requireContext(), "${selectedPlaylist.title} 클릭됨", Toast.LENGTH_SHORT).show()
-        }
+        }, onItemLongClick = { playlist ->
+            AlertDialog.Builder(requireContext())
+                .setTitle("플레이리스트 삭제")
+                .setMessage("「${playlist.title}」을 삭제하시겠습니까?")
+                .setPositiveButton("삭제") { _, _ ->
+                    val user = FirebaseAuth.getInstance().currentUser
+                    val uid = user?.uid ?: return@setPositiveButton
+
+                    deletePlaylist(uid, playlist.title) {
+                        mainActivity.playLists.remove(playlist)
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+                .setNegativeButton("취소", null)
+                .show()
+        })
         storeRecyclerView.adapter = adapter
 
         // "+" 버튼 클릭 시 빈 플레이리스트 추가
@@ -102,15 +118,16 @@ class StoreFragment : Fragment() {
 
         storeRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        val mainActivity = requireActivity() as MainActivity
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        mainActivity.playLists.clear()
 
         FirebaseFirestore.getInstance()
             .collection("users").document(uid)
             .collection("playlists")
             .get()
             .addOnSuccessListener { documents ->
-                val playlistList = mutableListOf<Playlist>()
-
                 for (doc in documents) {
                     val title = doc.getString("title") ?: ""
                     val picture = doc.getString("picture")
@@ -125,13 +142,31 @@ class StoreFragment : Fragment() {
                             songUrl = it["songUrl"] as String
                         )
                     }.toMutableList()
-                    playlistList.add(Playlist(title,picture,songs))
+                    mainActivity.playLists.add(Playlist(title,picture,songs))
                 }
-                adapter = PlaylistAdapter(playlistList) { selectedPlaylist ->
-                    Toast.makeText(requireContext(), "${selectedPlaylist.title} 클릭됨", Toast.LENGTH_SHORT).show()
-                }
-
-                storeRecyclerView.adapter = adapter
+                adapter.notifyDataSetChanged()
             }
     }
+    fun deletePlaylist(userId: String, playlistTitle: String, onComplete: () -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("users").document(userId)
+            .collection("playlists")
+            .whereEqualTo("title", playlistTitle)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (doc in documents) {
+                    db.collection("users").document(userId)
+                        .collection("playlists")
+                        .document(doc.id)
+                        .delete()
+                }
+                Toast.makeText(requireContext(), "플레이리스트가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                onComplete()
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "삭제 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
 }

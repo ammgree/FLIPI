@@ -1,6 +1,7 @@
 package com.example.itunesapi
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -25,11 +26,7 @@ class EditPlaylistFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        song = arguments?.getParcelable("album") ?: run {
-            Toast.makeText(requireContext(),"노래 정보가 없습니다.", Toast.LENGTH_SHORT).show()
-            requireActivity().supportFragmentManager.popBackStack()
-            return
-        }
+        song = arguments?.getParcelable("album")!!
     }
 
     override fun onCreateView(
@@ -53,8 +50,7 @@ class EditPlaylistFragment : Fragment() {
             val resultBundle = Bundle().apply {
                 putString("newPlaylistTitle", newTitle)
             }
-            parentFragmentManager.setFragmentResult("newPlaylist",resultBundle)
-            requireActivity().supportFragmentManager.popBackStack()
+
             mysongPlaylist.title = newTitle
             mysongPlaylist.picture = song.imageUrl
             mysongPlaylist.songs.add(song)
@@ -77,16 +73,21 @@ class EditPlaylistFragment : Fragment() {
                 .collection("playlists")
                 .add(playlistDTO)
                 .addOnSuccessListener {
-                    Toast.makeText(requireContext(), "저장 성공!", Toast.LENGTH_SHORT).show()
+                    if (isAdded) {
+                        parentFragmentManager.setFragmentResult("newPlaylist", resultBundle)
+                        Toast.makeText(requireContext(), "저장 성공!", Toast.LENGTH_SHORT).show()
+
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, StoreFragment())
+                            .commit()
+                    }
                 }
                 .addOnFailureListener { e ->
-                    Toast.makeText(requireContext(), "저장 실패 : ${e.message}", Toast.LENGTH_SHORT).show()
+                    if (isAdded) {
+                        Toast.makeText(requireContext(), "저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
-
-            Toast.makeText(requireContext(), "플리 제목을 '$newTitle'로 변경했습니다!", Toast.LENGTH_SHORT).show()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, StoreFragment())
-                .commit()
         }
+
     }
 }
