@@ -120,6 +120,23 @@ class ProfileFragment : Fragment() {
 
         }
 
+        if (uid != null) {
+            // 🔹 팔로워 수 가져오기
+            db.collection("users").document(uid).collection("followers")
+                .get()
+                .addOnSuccessListener { result ->
+                    followersText.text = "팔로워 ${result.size()}"
+                }
+
+            // 🔹 팔로잉 수 가져오기
+            db.collection("users").document(uid).collection("following")
+                .get()
+                .addOnSuccessListener { result ->
+                    followingText.text = "팔로잉 ${result.size()}"
+                }
+        }
+
+
         // 뒤로가기 버튼: 홈으로
         backButton.setOnClickListener {
             parentFragmentManager.beginTransaction()

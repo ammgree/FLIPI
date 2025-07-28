@@ -6,6 +6,33 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
+    <!-- 상단 바: 뒤로가기 버튼 + 제목 -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/baseline_arrow_back_ios_24"
+        android:background="@null"
+        android:contentDescription="뒤로가기"
+        app:tint="@android:color/white"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User Search"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginStart="12dp"
+        app:layout_constraintStart_toEndOf="@id/backButton"
+        app:layout_constraintTop_toTopOf="@id/backButton"
+        app:layout_constraintBottom_toBottomOf="@id/backButton"/>
+
     <EditText
         android:id="@+id/searchInput"
         android:layout_width="0dp"
@@ -15,7 +42,7 @@
         android:textColor="@android:color/white"
         android:textColorHint="#999999"
         android:backgroundTint="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/backButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/searchBtn"
         android:layout_margin="16dp"/>
