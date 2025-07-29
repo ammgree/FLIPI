@@ -1,6 +1,7 @@
 package com.example.itunesapi
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,8 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class EditPlaylistFragment : Fragment() {
 
@@ -47,8 +50,7 @@ class EditPlaylistFragment : Fragment() {
             val resultBundle = Bundle().apply {
                 putString("newPlaylistTitle", newTitle)
             }
-            parentFragmentManager.setFragmentResult("newPlaylist",resultBundle)
-            requireActivity().supportFragmentManager.popBackStack()
+
             mysongPlaylist.title = newTitle
             mysongPlaylist.picture = song.imageUrl
             mysongPlaylist.songs.add(song)
@@ -56,10 +58,36 @@ class EditPlaylistFragment : Fragment() {
             val mainActivity = requireActivity() as MainActivity
             mainActivity.playLists.add(0, mysongPlaylist)
 
-            Toast.makeText(requireContext(), "플리 제목을 '$newTitle'로 변경했습니다!", Toast.LENGTH_SHORT).show()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, StoreFragment())
-                .commit()
+            val user = FirebaseAuth.getInstance().currentUser
+            val uid = user?.uid ?: return@setOnClickListener
+
+            val db = FirebaseFirestore.getInstance()
+
+            val playlistDTO = PlaylistDTO(
+                title = mysongPlaylist.title,
+                picture = mysongPlaylist.picture,
+                songs = mysongPlaylist.songs.map { it.toMap() }
+            )
+
+            db.collection("users").document(uid)
+                .collection("playlists")
+                .add(playlistDTO)
+                .addOnSuccessListener {
+                    if (isAdded) {
+                        parentFragmentManager.setFragmentResult("newPlaylist", resultBundle)
+                        Toast.makeText(requireContext(), "저장 성공!", Toast.LENGTH_SHORT).show()
+
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, StoreFragment())
+                            .commit()
+                    }
+                }
+                .addOnFailureListener { e ->
+                    if (isAdded) {
+                        Toast.makeText(requireContext(), "저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
         }
+
     }
 }
