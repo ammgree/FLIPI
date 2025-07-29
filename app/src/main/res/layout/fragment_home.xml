@@ -1,42 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="none"
+    android:background="@color/black"
+    android:padding="16dp"
+    tools:context=".HomeFragment">
+
+<androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/home"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
     android:padding="16dp"
     tools:context=".HomeFragment">
-
-    <LinearLayout
-        android:id="@+id/detail_fragment_container"
-        android:layout_width="379dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storyRecyclerView">
-
-        <TextView
-            android:id="@+id/rcmdMent"
-            android:layout_width="380dp"
-            android:layout_height="77dp"
-            android:gravity="bottom"
-            android:textAlignment="viewStart"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rcmdSongRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="208dp"
-            android:paddingStart="8sp"
-            android:paddingTop="8sp" />
-
-    </LinearLayout>
 
     <ImageView
         android:id="@+id/profileImageView"
@@ -80,4 +60,58 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <TextView
+        android:id="@+id/rcmdMent"
+        android:layout_width="0dp"
+        android:layout_height="77dp"
+        android:layout_marginTop="44dp"
+        android:gravity="bottom"
+        android:textAlignment="viewStart"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/storyRecyclerView" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcmdSongRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="220dp"
+        android:layout_marginTop="10dp"
+        android:paddingStart="8sp"
+        android:paddingTop="8sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rcmdMent" />
+
+    <TextView
+        android:id="@+id/rcmdMentWeather"
+        android:layout_width="0dp"
+        android:layout_height="77dp"
+        android:layout_marginTop="10dp"
+        android:gravity="bottom"
+        android:text="여기에표시될거야"
+        android:textAlignment="viewStart"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rcmdSongRecyclerView" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcmdSongWeatherRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="220dp"
+        android:layout_marginTop="10dp"
+        android:paddingStart="8sp"
+        android:paddingTop="8sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rcmdMentWeather" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

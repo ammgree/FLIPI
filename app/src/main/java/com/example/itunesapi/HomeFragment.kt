@@ -58,26 +58,32 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         //$mood $usernme 님을 위한 노래 textveiw & recyclerView
         val mood = arguments?.getString("mood") ?: ""
         val username = arguments?.getString("username") ?: ""
         val recyclerView = view.findViewById<RecyclerView>(R.id.rcmdSongRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-
         val rcmdMent = view.findViewById<TextView>(R.id.rcmdMent)
         rcmdMent.text = "$mood $username 님을 위한 \n 오늘의 노래추천 🎵"
 
-        // HomeFragment onViewCreated 내부 등에서
         Thread {
             db.collection("songs")
                 .whereEqualTo("mood", mood)
                 .get()
                 .addOnSuccessListener { documents ->
                     lifecycleScope.launch(Dispatchers.IO) {
-                        val searchKeywords = documents.map { doc ->
-                            "${doc.getString("title")} ${doc.getString("artist")}"
-                        }.take(3)
+                        val searchKeywords = documents
+                            .mapNotNull { doc ->
+                                val title = doc.getString("title")
+                                val artist = doc.getString("artist")
+                                if (!title.isNullOrBlank() && !artist.isNullOrBlank()) {
+                                    "$title $artist"
+                                } else null
+                            }
+                            .shuffled()
+                            .take(5)
                         val albumList = mutableListOf<Album>()
                         searchKeywords.forEach { keyword ->
                             val term = URLEncoder.encode(keyword, "UTF-8")
