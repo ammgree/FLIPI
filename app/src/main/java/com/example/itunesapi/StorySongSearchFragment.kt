@@ -26,7 +26,7 @@ class StorySongSearchFragment : Fragment() {
 
         // 1. RecyclerView 설정
         recyclerView = view.findViewById(R.id.recyclerView)
-        adapter = AlbumAdapter(albumList) { album ->
+        adapter = AlbumAdapter(albumList, { album ->
             // 아이템 클릭 시 선택한 앨범 정보 전달
             val resultBundle = Bundle().apply {
                 putString("songTitle", album.title)
@@ -35,7 +35,7 @@ class StorySongSearchFragment : Fragment() {
             }
             parentFragmentManager.setFragmentResult("storySongSelected", resultBundle)
             parentFragmentManager.popBackStack() // 프래그먼트 종료
-        }
+        })
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 

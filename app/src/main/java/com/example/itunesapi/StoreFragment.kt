@@ -9,6 +9,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.replace
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -37,7 +38,15 @@ class StoreFragment : Fragment() {
 
         // 어댑터 설정
         adapter = PlaylistAdapter(mainActivity.playLists, onItemClick =  { selectedPlaylist ->
-            Toast.makeText(requireContext(), "${selectedPlaylist.title} 클릭됨", Toast.LENGTH_SHORT).show()
+            val bundle = Bundle().apply {
+                putSerializable("playlist", selectedPlaylist)
+            }
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container,ViewPlaylistFragment().apply {
+                    arguments = bundle
+                })
+                .addToBackStack(null)
+                .commit()
         }, onItemLongClick = { playlist ->
             AlertDialog.Builder(requireContext())
                 .setTitle("플레이리스트 삭제")
