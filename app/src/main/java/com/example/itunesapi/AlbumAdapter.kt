@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.parcelize.Parcelize
 
+
 @Parcelize
 data class Album (val title: String, val artist: String, val album: String,
              var imageUrl: String, val songUrl : String) : Parcelable
