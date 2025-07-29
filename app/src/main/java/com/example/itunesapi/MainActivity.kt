@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
         // <도연>main에서 fragment_container로 바꿨습니다. (이렇게 해야 다른 프로그먼트로 이동할떄, 하단바가 안 사라져요)
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, SearchFragment())
+            .replace(R.id.fragment_container, HomeFragment())
             .commit()
 
         // <도연>일기버튼 연결하겠습니다
