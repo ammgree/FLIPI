@@ -9,6 +9,8 @@ import android.widget.*
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -204,25 +206,52 @@ class SearchFragment : Fragment() {
 
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.menu_add -> {
+                    R.id.menu_add-> {
                         val mainActivity = requireActivity() as MainActivity
+
                         val playlistTitles = mainActivity.playLists.map { it.title }.toTypedArray()
 
                         val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
                         builder.setTitle("플레이리스트 선택")
-                        builder.setItems(playlistTitles) { _, which ->
+                        builder.setItems(playlistTitles) { dialog, which ->
                             val selectedPlaylist = mainActivity.playLists[which]
-                            adapter.selectedAlbum?.let { selectedPlaylist.songs.add(it) }
-                            Toast.makeText(
-                                requireContext(),
-                                "'${selectedPlaylist.title}'에 추가되었습니다!",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            val songToAdd = adapter.selectedAlbum
+
+                            if(songToAdd != null) {
+                                selectedPlaylist.songs.add(songToAdd)
+
+                                val user = FirebaseAuth.getInstance().currentUser
+                                val uid = user?.uid ?: return@setItems
+                                val db = FirebaseFirestore.getInstance()
+
+                                db.collection("users").document(uid)
+                                    .collection("playlists")
+                                    .whereEqualTo("title", selectedPlaylist.title)
+                                    .get()
+                                    .addOnSuccessListener { documents ->
+                                        for (doc in documents) {
+                                            val updatedSongs = selectedPlaylist.songs.map { it.toMap() }
+
+                                            db.collection("users").document(uid)
+                                                .collection("playlists")
+                                                .document(doc.id)
+                                                .update("songs", updatedSongs)
+                                                .addOnSuccessListener {
+                                                    Toast.makeText(requireContext(), "'${selectedPlaylist.title}'에 추가되었습니다!", Toast.LENGTH_SHORT).show()
+                                                }
+                                                .addOnFailureListener {
+                                                    Toast.makeText(requireContext(), "노래 추가 실패", Toast.LENGTH_SHORT).show()
+                                                }
+                                        }
+                                    }
+                                    .addOnFailureListener{
+                                        Toast.makeText(requireContext(), "보관함에 추가하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                                    }
+                            }
                         }
                         builder.show()
                         true
                     }
-
                     R.id.menu_add_new -> {
                         val songBundle = Bundle().apply {
                             putParcelable("album", adapter.selectedAlbum)
@@ -238,7 +267,6 @@ class SearchFragment : Fragment() {
                             .commit()
                         true
                     }
-
                     else -> false
                 }
             }
