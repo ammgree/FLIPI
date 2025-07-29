@@ -159,8 +159,21 @@ class SearchFragment : Fragment() {
                         }
 
                         else -> {
-                            allResults  // 전체 검색은 기본 정렬
+                            // 전체 검색일 때도 title 기준으로 정렬 적용
+                            val exact = allResults.filter { it.title.equals(rawInput, true) }
+                            val word = allResults.filter {
+                                !exact.contains(it) && it.title.lowercase().split(Regex("[\\s\\-\\[\\]]"))
+                                    .contains(rawInput.lowercase())
+                            }
+                            val partial = allResults.filter {
+                                !exact.contains(it) && !word.contains(it) && it.title.lowercase()
+                                    .contains(rawInput.lowercase())
+                            }
+                            val others = allResults - exact - word - partial
+                            exact + word + partial + others.sortedBy { it.artist }
                         }
+
+
                     }
 
 
