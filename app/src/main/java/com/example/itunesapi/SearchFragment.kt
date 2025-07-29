@@ -13,7 +13,6 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.Fragment
 import android.view.*
 import android.widget.*
 import androidx.navigation.fragment.findNavController
@@ -297,16 +296,15 @@ class SearchFragment : Fragment() {
         selected.setBackgroundColor(android.graphics.Color.DKGRAY)
     }
 
-    private fun makeMap(urls:String) : Map<String, Album>{
-        //URL 객체로 만들기
-        val url = URL(urls)
+    private fun makeMap(urls: String): Map<String, Album> {
+        val madeMap = mutableMapOf<String, Album>()
 
-        //GET 요청하기
-        val conn = url.openConnection() as HttpURLConnection
-        conn.requestMethod = "GET"
-        //5초동안만 데이터 받기
-        conn.connectTimeout = 5000
-        conn.readTimeout = 5000
+        try {
+            val url = URL(urls)
+            val conn = url.openConnection() as HttpURLConnection
+            conn.requestMethod = "GET"
+            conn.connectTimeout = 5000
+            conn.readTimeout = 5000
 
             if (conn.responseCode == HttpURLConnection.HTTP_OK) {
                 val stream = conn.inputStream
@@ -318,8 +316,7 @@ class SearchFragment : Fragment() {
 
                 for (i in 0 until jsonArray.length()) {
                     val item = jsonArray.getJSONObject(i)
-                    val id = item.optString("trackId")  // collectionId → trackId
-
+                    val id = item.optString("trackId")
 
                     val title = item.optString("trackName")
                     val artist = item.optString("artistName")
@@ -332,7 +329,6 @@ class SearchFragment : Fragment() {
             } else {
                 Log.e("iTunesAPI", "응답 코드 오류: ${conn.responseCode}")
             }
-
         } catch (e: Exception) {
             Log.e("iTunesAPI", "오류 발생: $e")
         }

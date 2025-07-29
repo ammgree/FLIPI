@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
+
 // 데이터 모델 클래스: 스토리 아이템을 나타냄
 import android.os.Parcelable
 import android.widget.TextView
@@ -85,10 +86,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             songMap.values.firstOrNull()?.let { albumList.add(it) }
                         }
                         withContext(Dispatchers.Main) {
-                            val adapter = AlbumAdapter(albumList) { album ->
-                                MusicPlayerManager.play(album.songUrl)
-                            }
+                            val adapter = AlbumAdapter(
+                                albumList,
+                                onItemClick = { album ->
+                                    MusicPlayerManager.play(album.songUrl)
+                                }
+                            )
                             recyclerView.adapter = adapter
+
+
                         }
                     }
                 }
