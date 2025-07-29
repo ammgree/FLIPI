@@ -3,7 +3,6 @@ package com.example.itunesapi
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +11,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.Toast
-import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONObject
@@ -151,7 +150,7 @@ class SearchFragment : Fragment() {
 
 
 
-    private fun makeMap(urls:String) : Map<String, Album>{
+    fun makeMap(urls:String) : Map<String, Album>{
         //URL 객체로 만들기
         val url = URL(urls)
 

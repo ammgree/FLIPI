@@ -16,7 +16,7 @@ import kotlinx.parcelize.Parcelize
 data class Album (val title: String, val artist: String, val album: String,
              var imageUrl: String, val songUrl : String) : Parcelable
 
-class AlbumAdapter(private val albumList: List<Album> // 검색 결과 앨범 목록
+class AlbumAdapter(val albumList: List<Album> // 검색 결과 앨범 목록
     , private val onItemClick: (Album) -> Unit) // 클릭했을 때 할 동작
     //adapter 외부(Activity나 Fragment)에서 람다 형태로 클릭 동작을 넘길 수 있게 함
     : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder>() {

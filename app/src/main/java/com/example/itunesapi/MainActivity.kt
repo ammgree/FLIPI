@@ -66,8 +66,17 @@ class MainActivity : AppCompatActivity() {
         val navHome = findViewById<ImageButton>(R.id.nav_home)
 
         navHome.setOnClickListener {
+            val mood = intent.getStringExtra("mood")
+            val username = intent.getStringExtra("username")
+
+            val fragment = HomeFragment().apply {
+                arguments = Bundle().apply {
+                    putString("mood", mood)
+                    putString("username", username)
+                }
+            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment())
+                .replace(R.id.fragment_container, fragment)
                 .commit()
         }
     }
