@@ -11,10 +11,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 
 @Parcelize
 data class Album (val title: String, val artist: String, val album: String,
-             var imageUrl: String, val songUrl : String) : Parcelable
+             var imageUrl: String, val songUrl : String) : Parcelable, Serializable
 
 class AlbumAdapter(private val albumList: List<Album> // 검색 결과 앨범 목록
     , private val onItemClick: (Album) -> Unit) // 클릭했을 때 할 동작
