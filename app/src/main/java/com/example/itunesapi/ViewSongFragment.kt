@@ -7,12 +7,16 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 
 class ViewSongFragment : Fragment() {
 
     private lateinit var songTitleTextView: TextView
     private lateinit var artistTextView: TextView
     private lateinit var albumImageView: ImageView
+    private lateinit var itplaylist: Playlist
+    private lateinit var itsonglist : List<Album>
+    private var currentIndex = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,5 +32,27 @@ class ViewSongFragment : Fragment() {
         artistTextView = view.findViewById(R.id.artistTextView)
         albumImageView = view.findViewById(R.id.albumImageView)
 
+
+        val playlist = arguments?.getSerializable("playlist") as? Playlist
+        val album =arguments?.getSerializable("selectedAlbum") as? Album
+
+        playlist?.let {
+            itplaylist = it
+            itsonglist = it.songs
+            currentIndex = itsonglist.indexOfFirst { it.title == album?.title }
+
+            if (currentIndex == -1) currentIndex = 0
+
+            updateSongUI(itsonglist[currentIndex])
+        }
+    }
+
+    private fun updateSongUI(album: Album) {
+        songTitleTextView.text = album.title
+        artistTextView.text = album.artist
+        Glide.with(this)
+            .load(album.imageUrl)
+            .into(albumImageView)
+        MusicPlayerManager.play(album.songUrl)
     }
 }

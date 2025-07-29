@@ -50,7 +50,7 @@ class SearchFragment : Fragment() {
         addButton = view.findViewById<ImageButton>(R.id.addbutton)
 
         // 이 albumList는 검색결과로 나오는 노래들
-        adapter = AlbumAdapter(albumList) { album ->
+        adapter = AlbumAdapter(albumList, { album ->
             adapter.selectAlbum(album)
             addButton.visibility = View.VISIBLE
 
@@ -69,7 +69,7 @@ class SearchFragment : Fragment() {
                 parentFragmentManager.setFragmentResult("songSelected", resultBundle)
                 parentFragmentManager.popBackStack()
             }
-        }
+        })
 
         recyclerView.adapter = adapter
 

@@ -18,7 +18,8 @@ data class Album (val title: String, val artist: String, val album: String,
              var imageUrl: String, val songUrl : String) : Parcelable, Serializable
 
 class AlbumAdapter(private val albumList: List<Album> // 검색 결과 앨범 목록
-    , private val onItemClick: (Album) -> Unit) // 클릭했을 때 할 동작
+    , private val onItemClick: (Album) -> Unit // 클릭했을 때 할 동작
+    , private val onItemLongClick: (Album) -> Unit ={} )
     //adapter 외부(Activity나 Fragment)에서 람다 형태로 클릭 동작을 넘길 수 있게 함
     : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder>() {
     var selectedAlbum : Album? = null
@@ -32,7 +33,7 @@ class AlbumAdapter(private val albumList: List<Album> // 검색 결과 앨범 �
 
 
         // 뷰에 앨범 데이터를 넣고 클릭 이벤트 설정
-        fun bind(album: Album, onClick: (Album) -> Unit, selectedAlbum: Album?) {
+        fun bind(album: Album, onClick: (Album) -> Unit, onItemLongClick: (Album) -> Unit, selectedAlbum: Album?) {
             albumTitle.text = album.title
             albumArtist.text = album.artist
             albumName.text = album.album
@@ -49,6 +50,10 @@ class AlbumAdapter(private val albumList: List<Album> // 검색 결과 앨범 �
             itemView.setOnClickListener {
                 onClick(album)
             }
+            itemView.setOnLongClickListener {
+                onItemLongClick(album)
+                true
+            }
         }
     }
 
@@ -63,7 +68,7 @@ class AlbumAdapter(private val albumList: List<Album> // 검색 결과 앨범 �
     override fun onBindViewHolder(holder: AlbumViewHolder, position: Int) {
         // position에 해당하는 데이터를 bind() 함수로 넘김
         // 실제 데이터가 뷰에 표시됨
-        holder.bind(albumList[position], onItemClick, selectedAlbum)
+        holder.bind(albumList[position], onItemClick, onItemLongClick,selectedAlbum)
     }
 
     // 전체 몇 개의 데이터를 보여줘야하는지 recyclerView가 알 수 있음
