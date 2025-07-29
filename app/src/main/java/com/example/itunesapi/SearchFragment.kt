@@ -86,13 +86,9 @@ class SearchFragment : Fragment() {
                     albumList.clear()
 
                     val songMap = makeMap(urlSong)
-                    val albumMap = makeMap(urlAlbum)
 
-                    for ((id, songData) in songMap) {
-                        if (albumMap.containsKey(id)) {
-                            albumList.add(songData)
-                        }
-                    }
+
+                    albumList.addAll(songMap.values)
 
                     activity?.runOnUiThread {
                         adapter.notifyDataSetChanged()

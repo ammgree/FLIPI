@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 
+
 @Parcelize
 data class Album (val title: String, val artist: String, val album: String,
              var imageUrl: String, val songUrl : String) : Parcelable, Serializable
