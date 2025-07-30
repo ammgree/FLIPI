@@ -18,11 +18,17 @@ class ViewSongFragment : Fragment() {
     private lateinit var artistTextView: TextView
     private lateinit var albumImageView: ImageView
     private lateinit var itplaylist: Playlist
-    private lateinit var itsonglist : List<Album>
-    private lateinit var goBackbtn : ImageButton
+    private lateinit var itsonglist: List<Album>
+    private lateinit var goBackbtn: ImageButton
     private var currentIndex = 0
-    lateinit var playButton: ImageButton
-    lateinit var pauseButton: ImageButton
+    private lateinit var playButton: ImageButton
+    private lateinit var pauseButton: ImageButton
+
+    // ✅ 리스너 변수화 (중복 등록/제거 방지)
+    private val playPauseListener: (Boolean) -> Unit = { isPlaying ->
+        playButton.visibility = if (isPlaying) GONE else VISIBLE
+        pauseButton.visibility = if (isPlaying) VISIBLE else GONE
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,69 +42,53 @@ class ViewSongFragment : Fragment() {
         artistTextView = view.findViewById(R.id.artistTextView)
         albumImageView = view.findViewById(R.id.albumImageView)
         goBackbtn = view.findViewById(R.id.goBackbtn)
-
-        val playlist = arguments?.getSerializable("playlist") as? Playlist
-        val album =arguments?.getSerializable("selectedAlbum") as? Album
-
+        playButton = view.findViewById(R.id.play)
+        pauseButton = view.findViewById(R.id.pause)
         val previous = view.findViewById<ImageButton>(R.id.skip_previous)
-        playButton = view.findViewById<ImageButton>(R.id.play)
-        pauseButton = view.findViewById<ImageButton>(R.id.pause)
         val next = view.findViewById<ImageButton>(R.id.skip_next)
 
-        MusicPlayerManager.addOnPlayPauseChangeListener{ isPlaying ->
-            playButton.visibility = if (isPlaying) GONE else VISIBLE
-            pauseButton.visibility = if (isPlaying) VISIBLE else GONE
-        }
+        val playlist = arguments?.getSerializable("playlist") as? Playlist
+        val album = arguments?.getSerializable("selectedAlbum") as? Album
+
+        // ✅ 리스너 등록
+        MusicPlayerManager.addOnPlayPauseChangeListener(playPauseListener)
 
         playlist?.let {
             itplaylist = it
             itsonglist = it.songs
             currentIndex = itsonglist.indexOfFirst { it.title == album?.title }
-
             if (currentIndex == -1) currentIndex = 0
 
             updateSongUI(itsonglist[currentIndex])
 
             previous.setOnClickListener {
-                if (currentIndex == 0)
-                    currentIndex = itsonglist.size-1
-                else
-                    currentIndex--
+                currentIndex = if (currentIndex == 0) itsonglist.size - 1 else currentIndex - 1
                 updateSongUI(itsonglist[currentIndex])
             }
 
             next.setOnClickListener {
-                if(currentIndex == itsonglist.size-1)
-                    currentIndex = 0
-                else
-                    currentIndex++
+                currentIndex = if (currentIndex == itsonglist.size - 1) 0 else currentIndex + 1
                 updateSongUI(itsonglist[currentIndex])
             }
 
             playButton.setOnClickListener {
                 MusicPlayerManager.resume()
-                playButton.visibility = View.GONE
-                pauseButton.visibility = View.VISIBLE
             }
 
             pauseButton.setOnClickListener {
                 MusicPlayerManager.pause()
-                playButton.visibility = View.VISIBLE
-                pauseButton.visibility = View.GONE
             }
 
+            // ✅ fragment가 activity에 attach되어 있는지 확인
             MusicPlayerManager.setOnCompletionListener {
-                requireActivity().runOnUiThread {
-                    if (currentIndex == itsonglist.size-1)
-                        currentIndex = 0
-                    else
-                        currentIndex++
+                activity?.runOnUiThread {
+                    currentIndex = if (currentIndex == itsonglist.size - 1) 0 else currentIndex + 1
                     updateSongUI(itsonglist[currentIndex])
                 }
             }
         }
 
-        goBackbtn.setOnClickListener{
+        goBackbtn.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
     }
@@ -114,9 +104,7 @@ class ViewSongFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        MusicPlayerManager.removeOnPlayPauseChangeListener{ isPlaying ->
-            playButton.visibility = if (isPlaying) GONE else VISIBLE
-            pauseButton.visibility = if (isPlaying) VISIBLE else GONE
-        }
+        // ✅ 리스너 해제
+        MusicPlayerManager.removeOnPlayPauseChangeListener(playPauseListener)
     }
 }
