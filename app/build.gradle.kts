@@ -39,6 +39,11 @@ android {
             )
         }
     }
+
+    buildFeatures {
+        viewBinding=true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -65,6 +70,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx:24.9.1")
     implementation("com.google.firebase:firebase-storage-ktx:20.3.0")
 
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
     implementation(libs.play.services.location)
