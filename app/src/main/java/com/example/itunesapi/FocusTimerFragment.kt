@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.itunesapi.databinding.FragmentFocusTimerBinding
 import java.text.SimpleDateFormat
 import java.util.*
@@ -185,13 +186,22 @@ class FocusTimerFragment : Fragment() {
         parentFragmentManager.setFragmentResultListener("songSelected", viewLifecycleOwner) { key, bundle ->
             val musicUrl = bundle.getString("musicUrl") ?: ""
             val musicTitle = bundle.getString("musicTitle") ?: ""
+            val musicArtist = bundle.getString("musicArtist") ?: ""
+            val albumArtUrl = bundle.getString("albumArtUrl") ?: ""
 
             this.musicUrl = musicUrl
-            this.subjectName = musicTitle // 필요시 제목도 저장
+            this.subjectName = musicTitle
 
-            Toast.makeText(requireContext(), "노래 선택됨: $musicTitle", Toast.LENGTH_SHORT).show()
+            // 음악 정보 표시 영역 업데이트
+            binding.currentMusicBox.visibility = View.VISIBLE
+            binding.tvCurrentMusicTitle.text = "재생 중: $musicTitle - $musicArtist"
 
-            // 음악 재생 재시작
+            Glide.with(this)
+                .load(albumArtUrl)
+                .placeholder(R.drawable.music_note)  // 기본 이미지
+                .into(binding.albumArt)
+
+            // 기존 음악 중지 후 새 음악 재생
             stopMusic()
             playMusic()
         }

@@ -13,16 +13,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.io.Serializable
+
+data class ViewPlaylist(
+    val title: String,
+    val songs: List<Album>
+) : Serializable
 
 class ViewPlaylistFragment : Fragment() {
 
     private lateinit var adapter: AlbumAdapter
+    private lateinit var showPlaylistView: RecyclerView
+    private lateinit var playlist: Playlist
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_view_playlist, container, false)
     }
 
@@ -30,6 +37,7 @@ class ViewPlaylistFragment : Fragment() {
         val goBackbtn = view.findViewById<ImageButton>(R.id.goBackbtn)
         val PlaylistName = view.findViewById<TextView>(R.id.PlaylistName)
         val showPlaylistView = view.findViewById<RecyclerView>(R.id.showPlaylistView)
+
 
         val playlist = arguments?.getSerializable("playlist") as? Playlist
         playlist?.let {
@@ -39,17 +47,24 @@ class ViewPlaylistFragment : Fragment() {
 
         adapter = AlbumAdapter(albumList = playlist!!.songs, { album ->
             adapter.selectAlbum(album)
-            adapter.selectedAlbum?.songUrl?.let { MusicPlayerManager.play(it) }
-            val bundle = Bundle().apply {
-                putSerializable("playlist", playlist)
-                putSerializable("selectedAlbum", adapter.selectedAlbum)
+
+            val result = Bundle().apply {
+                putString("musicTitle", album.title)
+                putString("musicUrl", album.songUrl)
+                putString("musicArtist", album.artist)
+                putString("albumArtUrl", album.imageUrl)
             }
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container,ViewSongFragment().apply {
-                    arguments = bundle
-                })
-                .addToBackStack(null)
-                .commit()
+
+            parentFragmentManager.setFragmentResult("songSelected", result)
+            val fm = parentFragmentManager
+            val popped = fm.popBackStackImmediate("FocusTimer", 0)
+            if (!popped) {
+                val fragment = FocusTimerFragment.newInstance(album.title, album.songUrl)
+                fm.beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack("FocusTimer")
+                    .commit()
+            }
         }, { album ->
             AlertDialog.Builder(requireContext())
                 .setTitle("노래 삭제")

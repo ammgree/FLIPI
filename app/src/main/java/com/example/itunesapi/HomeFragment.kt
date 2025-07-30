@@ -37,6 +37,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import com.example.itunesapi.BuildConfig
+import android.location.Geocoder
+import java.util.Locale
 
 @Parcelize
 data class StoryItem(
@@ -262,6 +264,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 val response = client.newCall(request).execute()
                 val responseData = response.body?.string()
 
+                val locationName = getLocationName(lat,lon) //지역명얻기
                 requireActivity().runOnUiThread {
                     if (!response.isSuccessful || responseData == null) {
                         weatherTextView.text = "날씨 API 호출 실패 (${response.code})"
@@ -271,15 +274,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val json = JSONObject(responseData)
                         if (!json.has("weather")) {
                             weatherTextView.text = "날씨 정보를 불러올 수 없습니다."
-                            Log.e("WeatherAPI", "No 'weather' field in response: $responseData")
                             return@runOnUiThread
                         }
 
                         val weatherArray = json.getJSONArray("weather")
                         val main = weatherArray.getJSONObject(0).getString("main")
                         val condition = WeatherUtil.classifyWeather(main)
-                        Log.d("fetchWeather", "main = $main, condition = $condition")
-                        weatherTextView.text = "현재 날씨는 $condition 입니다. \n이런 노래 어떠세요?"
+                        weatherTextView.text = "현재 지역은 $locationName, 날씨는 $condition 입니다. \n이런 노래 어떠세요?"
 
                         val weatherRecyclerView = requireView().findViewById<RecyclerView>(R.id.rcmdSongWeatherRecyclerView)
                         weatherRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -306,6 +307,30 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             getLastLocation()
         } else {
             weatherTextView.text = "위치 권한이 필요합니다."
+        }
+    }
+
+    private fun getLocationName(lat: Double, lon: Double): String {
+        return try {
+            val geocoder = Geocoder(requireContext(), Locale.KOREA)
+            val addresses = geocoder.getFromLocation(lat, lon, 1)
+            if (addresses != null && addresses.isNotEmpty()) {
+                val address = addresses[0]
+                // 시/구/동을 조합해서 지역명 만들기
+                val adminArea = address.adminArea ?: ""    //시/도
+                val subLocality = address.subLocality ?: "" // 구
+                val thoroughfare = address.thoroughfare ?: "" // 동
+
+                listOf(adminArea, subLocality, thoroughfare)
+                    .filter { it.isNotBlank() }
+                    .distinct()
+                    .joinToString(" ")
+            } else {
+                "알 수 없음"
+            }
+        } catch (e: Exception) {
+            Log.e("getLocationName", "Geocoding error: ${e.message}")
+            "알 수 없음"
         }
     }
 }
