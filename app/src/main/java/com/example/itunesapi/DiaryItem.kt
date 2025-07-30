@@ -1,4 +1,3 @@
-
 package com.example.itunesapi
 
 data class DiaryItem(

@@ -56,7 +56,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val db = FirebaseFirestore.getInstance()
 
     private val storyList = mutableListOf<StoryItem>()
-    private lateinit var storyRecyclerView: RecyclerView
+
     private lateinit var storyAdapter: StoryAdapter
 
 
