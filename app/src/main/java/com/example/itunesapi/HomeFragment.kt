@@ -119,6 +119,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
 
+        val settingButton = view.findViewById<ImageView>(R.id.setting)
+        settingButton.setOnClickListener {
+            val settingFragment = SettingFragment()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, settingFragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
+
         // 4. 프로필 이미지 클릭 → 프로필 프래그먼트로 이동
         profileImageView.setOnClickListener {
             val bundle = Bundle().apply { //이때 걍 정보도 같이 보낼겜

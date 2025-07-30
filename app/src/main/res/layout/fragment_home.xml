@@ -24,6 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Home"
+            android:layout_marginTop="15dp"
             android:textColor="#FFFFFF"
             android:textSize="30sp"
             android:textStyle="bold"
@@ -36,7 +37,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="60dp"
             android:background="@drawable/circle_background"
             android:clipToOutline="true"
             android:contentDescription="프로필 이미지"
@@ -44,7 +45,22 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 추천 멘트 -->
+        <!-- 프로필 이미지 -->
+
+
+        <ImageView
+            android:id="@+id/setting"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="설정 아이콘"
+            android:src="@drawable/setting"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#B1B0B0" />
+
+
         <TextView
             android:id="@+id/rcmdMent"
             android:layout_width="0dp"

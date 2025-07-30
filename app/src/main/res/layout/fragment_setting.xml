@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SettingFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:padding="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 상단: 뒤로가기 + 설정 텍스트 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/backBtn"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/baseline_arrow_back_ios_24"
+                    android:contentDescription="뒤로가기"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Setting"
+                    android:textColor="@android:color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="12dp" />
+            </LinearLayout>
+
+            <!-- 프로필 이미지 -->
+            <ImageView
+                android:id="@+id/profileImage"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp"
+                android:src="@drawable/ic_launcher_foreground"
+                android:background="@drawable/circle_background"
+                android:scaleType="centerCrop"
+                android:clipToOutline="true"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <!-- 사용자 이름 -->
+            <EditText
+                android:id="@+id/regName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="사용자 이름 재설정"
+                android:inputType="text"
+                android:textColor="@color/white"
+                android:textColorHint="#78FFFFFF"
+                android:layout_marginTop="20dp" />
+
+            <!-- 확인 버튼 있는 레이아웃 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/regPwConfirm"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:hint="현재 비밀번호 (최소 6글자)"
+                    android:inputType="textPassword"
+                    android:textColor="@color/white"
+                    android:textColorHint="#6FFFFFFF" />
+
+                <Button
+                    android:id="@+id/confirmPwBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="확인"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <!-- 비밀번호 재설정 - 기본은 숨김 -->
+            <EditText
+                android:id="@+id/regPw"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="비밀번호 재설정 (최소 6글자)"
+                android:inputType="textPassword"
+                android:textColor="@color/white"
+                android:textColorHint="#6FFFFFFF"
+                android:layout_marginTop="12dp"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/prePwConfirm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="비밀번호 재확인"
+                android:inputType="textPassword"
+                android:textColor="@color/white"
+                android:textColorHint="#6FFFFFFF"
+                android:layout_marginTop="12dp"
+                android:visibility="gone" />
+
+
+            <!-- 저장 버튼 -->
+            <Button
+                android:id="@+id/saveBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="저장"
+                android:layout_marginTop="24dp" />
+
+            <!-- 로그아웃 텍스트 버튼 -->
+            <TextView
+                android:id="@+id/logoutText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="로그아웃"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_gravity="end"
+                android:layout_marginTop="12dp"
+                android:padding="8dp"
+                android:clickable="true" />
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>
