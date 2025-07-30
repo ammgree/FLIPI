@@ -18,6 +18,16 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        val apiKey: String = project.rootProject.file("local.properties")
+            .readLines()
+            .find { it.startsWith("OWM_API_KEY=") }
+            ?.substringAfter("=")
+            ?: ""
+        buildConfigField("String", "OWM_API_KEY", "\"$apiKey\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -54,6 +64,10 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx:22.1.1")
     implementation("com.google.firebase:firebase-firestore-ktx:24.9.1")
     implementation("com.google.firebase:firebase-storage-ktx:20.3.0")
+
+
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation(libs.play.services.location)
 
 
     testImplementation(libs.junit)
