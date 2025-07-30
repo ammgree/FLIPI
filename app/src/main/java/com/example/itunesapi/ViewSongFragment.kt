@@ -3,8 +3,9 @@ package com.example.itunesapi
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -20,12 +21,14 @@ class ViewSongFragment : Fragment() {
     private lateinit var itsonglist : List<Album>
     private lateinit var goBackbtn : ImageButton
     private var currentIndex = 0
+    lateinit var playButton: ImageButton
+    lateinit var pauseButton: ImageButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_story_detail, container, false)
+        return inflater.inflate(R.layout.fragment_view_song, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -34,9 +37,18 @@ class ViewSongFragment : Fragment() {
         albumImageView = view.findViewById(R.id.albumImageView)
         goBackbtn = view.findViewById(R.id.goBackbtn)
 
-
         val playlist = arguments?.getSerializable("playlist") as? Playlist
         val album =arguments?.getSerializable("selectedAlbum") as? Album
+
+        val previous = view.findViewById<ImageButton>(R.id.skip_previous)
+        playButton = view.findViewById<ImageButton>(R.id.play)
+        pauseButton = view.findViewById<ImageButton>(R.id.pause)
+        val next = view.findViewById<ImageButton>(R.id.skip_next)
+
+        MusicPlayerManager.addOnPlayPauseChangeListener{ isPlaying ->
+            playButton.visibility = if (isPlaying) GONE else VISIBLE
+            pauseButton.visibility = if (isPlaying) VISIBLE else GONE
+        }
 
         playlist?.let {
             itplaylist = it
@@ -46,6 +58,44 @@ class ViewSongFragment : Fragment() {
             if (currentIndex == -1) currentIndex = 0
 
             updateSongUI(itsonglist[currentIndex])
+
+            previous.setOnClickListener {
+                if (currentIndex == 0)
+                    currentIndex = itsonglist.size-1
+                else
+                    currentIndex--
+                updateSongUI(itsonglist[currentIndex])
+            }
+
+            next.setOnClickListener {
+                if(currentIndex == itsonglist.size-1)
+                    currentIndex = 0
+                else
+                    currentIndex++
+                updateSongUI(itsonglist[currentIndex])
+            }
+
+            playButton.setOnClickListener {
+                MusicPlayerManager.resume()
+                playButton.visibility = View.GONE
+                pauseButton.visibility = View.VISIBLE
+            }
+
+            pauseButton.setOnClickListener {
+                MusicPlayerManager.pause()
+                playButton.visibility = View.VISIBLE
+                pauseButton.visibility = View.GONE
+            }
+
+            MusicPlayerManager.setOnCompletionListener {
+                requireActivity().runOnUiThread {
+                    if (currentIndex == itsonglist.size-1)
+                        currentIndex = 0
+                    else
+                        currentIndex++
+                    updateSongUI(itsonglist[currentIndex])
+                }
+            }
         }
 
         goBackbtn.setOnClickListener{
@@ -59,6 +109,14 @@ class ViewSongFragment : Fragment() {
         Glide.with(this)
             .load(album.imageUrl)
             .into(albumImageView)
-        MusicPlayerManager.play(album.songUrl)
+        MusicPlayerManager.play(album)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        MusicPlayerManager.removeOnPlayPauseChangeListener{ isPlaying ->
+            playButton.visibility = if (isPlaying) GONE else VISIBLE
+            pauseButton.visibility = if (isPlaying) VISIBLE else GONE
+        }
     }
 }

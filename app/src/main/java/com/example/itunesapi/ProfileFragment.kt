@@ -21,11 +21,10 @@ class ProfileFragment : Fragment() {
     private lateinit var diaryTabButton: Button
     private lateinit var archiveTabButton: Button
     private lateinit var diaryRecyclerView: RecyclerView
+    private lateinit var archiveRecyclerView: RecyclerView
     private lateinit var followingText : TextView
     private lateinit var followersText : TextView
     private lateinit var postCountText : TextView
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,6 +36,8 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+
         // 🔗 UI 연결
         backButton = view.findViewById(R.id.backButton)
         searchButton = view.findViewById(R.id.searchButton)
@@ -45,44 +46,38 @@ class ProfileFragment : Fragment() {
         diaryTabButton = view.findViewById(R.id.diaryTabButton)
         archiveTabButton = view.findViewById(R.id.archiveTabButton)
         diaryRecyclerView = view.findViewById(R.id.diaryRecyclerView)
-        diaryRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        archiveRecyclerView = view.findViewById(R.id.archiveRecyclerView)
+
         followersText = view.findViewById(R.id.followersText)
         followingText = view.findViewById(R.id.followingText)
         postCountText = view.findViewById(R.id.postCountText)
 
-
+        diaryRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        archiveRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         val db = FirebaseFirestore.getInstance()
 
-        //diaryAdapter 설정
-
+        // 🔸 다이어리 탭용 어댑터 및 데이터
         val diaryList = mutableListOf<DiaryItem>()
-
-
-
         val diaryAdapter = DiaryAdapter(
             diaryList,
             onItemClick = { diaryItem ->
-                // 클릭 시 처리: 예를 들어 일기 상세 보기로 이동
-                Toast.makeText(requireContext(), "클릭됨: ${diaryItem.title}", Toast.LENGTH_SHORT).show()
-
-                // 일기 상세 보기 프래그먼트로 이동
                 val fragment = DiaryDetailFragment(diaryItem)
                 parentFragmentManager.beginTransaction()
-                     .replace(R.id.fragment_container, fragment)
-                     .addToBackStack(null)
-                     .commit()
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack(null)
+                    .commit()
             },
             onItemLongClick = { diaryItem ->
-                // 길게 눌렀을 때 처리: 예를 들어 삭제 다이얼로그 띄우기
                 Toast.makeText(requireContext(), "길게 누름: ${diaryItem.title}", Toast.LENGTH_SHORT).show()
             },
             isProfile = true
         )
         diaryRecyclerView.adapter = diaryAdapter
 
-        // Firestore에서 프로필 정보 불러오기
+        // 🔹 Firestore에서 사용자 정보
         if (uid != null) {
             db.collection("users").document(uid).get()
                 .addOnSuccessListener { document ->
@@ -98,8 +93,7 @@ class ProfileFragment : Fragment() {
                     }
                 }
 
-
-            // Firestore에서 일기 목록 불러오기
+            // 🔹 Firestore에서 일기 목록 불러오기
             db.collection("users").document(uid).collection("diaries")
                 .get()
                 .addOnSuccessListener { result ->
@@ -109,26 +103,21 @@ class ProfileFragment : Fragment() {
                         diaryList.add(diary)
                     }
 
-                    // 일기 개수 반영
                     postCountText.text = "게시물 ${diaryList.size}"
-
                     diaryAdapter.notifyDataSetChanged()
                 }
                 .addOnFailureListener {
                     Toast.makeText(requireContext(), "일기를 불러오지 못했어요", Toast.LENGTH_SHORT).show()
                 }
 
-        }
-
-        if (uid != null) {
-            // 🔹 팔로워 수 가져오기
+            // 🔹 팔로워 수
             db.collection("users").document(uid).collection("followers")
                 .get()
                 .addOnSuccessListener { result ->
                     followersText.text = "팔로워 ${result.size()}"
                 }
 
-            // 🔹 팔로잉 수 가져오기
+            // 🔹 팔로잉 수
             db.collection("users").document(uid).collection("following")
                 .get()
                 .addOnSuccessListener { result ->
@@ -136,15 +125,24 @@ class ProfileFragment : Fragment() {
                 }
         }
 
+        // 🔙 뒤로가기: 홈
+        val username = arguments?.getString("username") //homefragment에서받아왔음
+        val mood = arguments?.getString("mood")
 
-        // 뒤로가기 버튼: 홈으로
         backButton.setOnClickListener {
+            val bundle = Bundle().apply { //이때 다시 보낸다~
+                putString("username", username)
+                putString("mood", mood)
+            }
+            val homeFragment = HomeFragment()
+            homeFragment.arguments = bundle
+
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment())
+                .replace(R.id.fragment_container, homeFragment)
                 .commit()
         }
 
-        // 검색 버튼: 검색 화면으로
+        // 🔍 검색 화면으로 이동
         searchButton.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, UserSearchFragment())
@@ -152,6 +150,7 @@ class ProfileFragment : Fragment() {
                 .commit()
         }
 
+        // 🔄 팔로워/팔로잉 목록으로 이동
         followersText.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, FollowersListFragment())
@@ -166,18 +165,59 @@ class ProfileFragment : Fragment() {
                 .commit()
         }
 
-
-        // 하단바 숨기기
+        // 하단 바 숨기기
         activity?.findViewById<View>(R.id.navigationBar)?.visibility = View.GONE
 
-        // 일기 탭 기본 선택 상태
+        // ✅ 일기 탭 클릭 시
         diaryTabButton.setOnClickListener {
-            // 이미 표시 중이니까 생략 또는 효과 넣어줘도 됨
+            diaryRecyclerView.visibility = View.VISIBLE
+            archiveRecyclerView.visibility = View.GONE
         }
 
+        // ✅ 보관함 탭 클릭 시 (플레이리스트 목록)
         archiveTabButton.setOnClickListener {
-            Toast.makeText(requireContext(), "보관함 기능은 아직 준비 중입니다.", Toast.LENGTH_SHORT).show()
+            diaryRecyclerView.visibility = View.GONE
+            archiveRecyclerView.visibility = View.VISIBLE
+
+            val archiveList = mutableListOf<Playlist>()
+            val archiveAdapter = PlaylistAdapter(
+                archiveList,
+                onItemClick = { playlist ->
+                    val bundle = Bundle().apply {
+                        putSerializable("playlist", playlist)
+                    }
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, ViewPlaylistFragment().apply {
+                            arguments = bundle
+                        })
+                        .addToBackStack(null)
+                        .commit()
+                },
+                onItemLongClick = { playlist ->
+                    Toast.makeText(requireContext(), "길게 누름: ${playlist.title}", Toast.LENGTH_SHORT).show()
+                }
+            )
+
+            archiveRecyclerView.adapter = archiveAdapter
+
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
+            FirebaseFirestore.getInstance()
+                .collection("users").document(uid)
+                .collection("playlists")
+                .get()
+                .addOnSuccessListener { result ->
+                    archiveList.clear()
+                    for (document in result) {
+                        val title = document.getString("title") ?: ""
+                        val picture = document.getString("picture") ?: ""
+                        val playlist = Playlist(title, picture)
+                        archiveList.add(playlist)
+                    }
+                    archiveAdapter.notifyDataSetChanged()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), "보관함 불러오기 실패", Toast.LENGTH_SHORT).show()
+                }
         }
     }
-
 }

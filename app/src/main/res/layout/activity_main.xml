@@ -10,12 +10,76 @@
         android:id="@+id/fragment_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/navigationBar"
+        app:layout_constraintBottom_toTopOf="@+id/currentSong"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/currentSong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/darkgray"
+        app:layout_constraintBottom_toBottomOf="@+id/navigationBar"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_container"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/songAlbum"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            app:layout_constraintBottom_toBottomOf="@id/currentSong"
+            app:layout_constraintStart_toStartOf="@id/currentSong"
+            app:layout_constraintTop_toTopOf="@id/currentSong" />
+
+        <TextView
+            android:id="@+id/songTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:hint="제목이지롱"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/songAlbum"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/currentSong"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!--재생버튼-->
+            <ImageButton
+                android:id="@+id/play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:src="@drawable/play_arroow"
+                android:visibility="gone"
+                app:tint="@color/white" />
+
+            <!--정지버튼-->
+            <ImageButton
+                android:id="@+id/pause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:src="@drawable/pause"
+                android:visibility="visible"
+                app:tint="@color/white" />
+        </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <LinearLayout
         android:id="@+id/navigationBar"
         android:layout_width="0dp"
@@ -25,7 +89,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fragment_container">
+        app:layout_constraintTop_toBottomOf="@id/currentSong">
 
         <ImageButton
             android:id="@+id/nav_home"
