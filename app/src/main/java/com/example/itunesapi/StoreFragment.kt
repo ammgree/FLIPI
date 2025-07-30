@@ -133,7 +133,7 @@ class StoreFragment : Fragment() {
                                 searchItunesSong(it.title)
                             }
                             if (albums.isNotEmpty()) {
-                                // ✅ 여기가 변경된 부분!
+                                // 여기가 변경된 부분!
                                 showPlaylistTitleDialog(albums)
                             } else {
                                 Toast.makeText(requireContext(), "iTunes 검색 실패", Toast.LENGTH_SHORT).show()
@@ -163,7 +163,11 @@ class StoreFragment : Fragment() {
 
     // 유튜브 플레이리스트 영상 정보 가져오기 (최대 30개)
     suspend fun fetchYoutubePlaylistItems(playlistId: String): List<YoutubeVideoInfo> {
-        val apiKey = "AIzaSyAsQV0_PF41bJiuoavCZ3sEIIc9_kdaMx0"
+
+        KeyManager.init(requireContext())
+        val apiKey = KeyManager.get("YOUTUBE_API_KEY")
+
+
         val url =
             "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=$playlistId&maxResults=30&key=$apiKey"
         val request = Request.Builder().url(url).build()

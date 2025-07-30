@@ -55,7 +55,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var storyRecyclerView: RecyclerView
     private lateinit var storyAdapter: StoryAdapter
 
-    private val apiKey = BuildConfig.OWM_API_KEY
+
+    private var weatherApiKey: String = ""
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var weatherTextView: TextView
 
@@ -69,6 +71,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
+        KeyManager.init(requireContext())
+        weatherApiKey = KeyManager.get("OWM_API_KEY")
+
 
         //MODD 기분기반노래추천 = $mood $usernme 님을 위한 노래 textveiw & recyclerView
         val mood = arguments?.getString("mood") ?: ""
@@ -257,8 +264,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
  Thread {
             try {
                 val client = OkHttpClient()
-                val url =
-                    "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&lang=kr&units=metric"
+                val url = "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$weatherApiKey&lang=kr&units=metric"
+
+
 
                 val request = Request.Builder().url(url).build()
                 val response = client.newCall(request).execute()
