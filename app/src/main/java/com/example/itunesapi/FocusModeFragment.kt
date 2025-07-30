@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import android.widget.*
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -63,7 +62,7 @@ class FocusModeFragment : Fragment() {
                     parentFragmentManager.beginTransaction()
                         .replace(
                             R.id.fragment_container,
-                            FocusTimerFragment.newInstance(topic, "", arrayListOf(), 0)
+                            FocusTimerFragment.newInstance(topic, "")
                         )
                         .addToBackStack(null)
                         .commit()
@@ -72,6 +71,7 @@ class FocusModeFragment : Fragment() {
             topicContainer.addView(button)
         }
     }
+
 
     private fun updateBarChart(topicMap: Map<String, Int>) {
         val entries = ArrayList<BarEntry>()
@@ -163,5 +163,3 @@ class FocusModeFragment : Fragment() {
         return map
     }
 }
-
-

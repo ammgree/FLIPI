@@ -3,10 +3,11 @@ package com.example.itunesapi
 import java.io.Serializable
 
 data class Playlist(
-    var title: String,
+    var title: String = "",
     var picture: String? = null,
     val songs: MutableList<Album> = mutableListOf()
 ) : Serializable
+
 
 // firebase 넣기 위해
 data class PlaylistDTO(

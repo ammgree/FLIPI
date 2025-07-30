@@ -77,7 +77,7 @@ class ProfileFragment : Fragment() {
         )
         diaryRecyclerView.adapter = diaryAdapter
 
-        // 🔹 Firestore에서 사용자 정보
+        // Firestore에서 사용자 정보
         if (uid != null) {
             db.collection("users").document(uid).get()
                 .addOnSuccessListener { document ->
@@ -93,7 +93,7 @@ class ProfileFragment : Fragment() {
                     }
                 }
 
-            // 🔹 Firestore에서 일기 목록 불러오기
+            // Firestore에서 일기 목록 불러오기
             db.collection("users").document(uid).collection("diaries")
                 .get()
                 .addOnSuccessListener { result ->
@@ -110,14 +110,14 @@ class ProfileFragment : Fragment() {
                     Toast.makeText(requireContext(), "일기를 불러오지 못했어요", Toast.LENGTH_SHORT).show()
                 }
 
-            // 🔹 팔로워 수
+            // 팔로워 수
             db.collection("users").document(uid).collection("followers")
                 .get()
                 .addOnSuccessListener { result ->
                     followersText.text = "팔로워 ${result.size()}"
                 }
 
-            // 🔹 팔로잉 수
+            // 팔로잉 수
             db.collection("users").document(uid).collection("following")
                 .get()
                 .addOnSuccessListener { result ->
@@ -125,7 +125,7 @@ class ProfileFragment : Fragment() {
                 }
         }
 
-        // 🔙 뒤로가기: 홈
+        // 뒤로가기: 홈
         val username = arguments?.getString("username") //homefragment에서받아왔음
         val mood = arguments?.getString("mood")
 
@@ -142,7 +142,7 @@ class ProfileFragment : Fragment() {
                 .commit()
         }
 
-        // 🔍 검색 화면으로 이동
+        // 검색 화면으로 이동
         searchButton.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, UserSearchFragment())
@@ -150,31 +150,47 @@ class ProfileFragment : Fragment() {
                 .commit()
         }
 
-        // 🔄 팔로워/팔로잉 목록으로 이동
         followersText.setOnClickListener {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
+
+            val fragment = FollowersListFragment().apply {
+                arguments = Bundle().apply {
+                    putString("userId", uid)
+                }
+            }
+
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, FollowersListFragment())
+                .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
                 .commit()
         }
 
         followingText.setOnClickListener {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
+
+            val fragment = FollowingListFragment().apply {
+                arguments = Bundle().apply {
+                    putString("userId", uid)
+                }
+            }
+
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, FollowingListFragment())
+                .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
                 .commit()
         }
 
+
         // 하단 바 숨기기
         activity?.findViewById<View>(R.id.navigationBar)?.visibility = View.GONE
 
-        // ✅ 일기 탭 클릭 시
+        // 일기 탭 클릭 시
         diaryTabButton.setOnClickListener {
             diaryRecyclerView.visibility = View.VISIBLE
             archiveRecyclerView.visibility = View.GONE
         }
 
-        // ✅ 보관함 탭 클릭 시 (플레이리스트 목록)
+        // 보관함 탭 클릭 시 (플레이리스트 목록)
         archiveTabButton.setOnClickListener {
             diaryRecyclerView.visibility = View.GONE
             archiveRecyclerView.visibility = View.VISIBLE
@@ -185,6 +201,7 @@ class ProfileFragment : Fragment() {
                 onItemClick = { playlist ->
                     val bundle = Bundle().apply {
                         putSerializable("playlist", playlist)
+                        putString("origin", "archive") // 추가!
                     }
                     parentFragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, ViewPlaylistFragment().apply {
@@ -210,7 +227,21 @@ class ProfileFragment : Fragment() {
                     for (document in result) {
                         val title = document.getString("title") ?: ""
                         val picture = document.getString("picture") ?: ""
-                        val playlist = Playlist(title, picture)
+
+                        // 🔹 songs 필드 가져오기
+                        val songsData = document.get("songs") as? List<Map<String, Any>> ?: emptyList()
+                        val songs = songsData.map {
+                            Album(
+                                title = it["title"] as? String ?: "",
+                                artist = it["artist"] as? String ?: "",
+                                album = it["album"] as? String ?: "",
+                                imageUrl = it["imageUrl"] as? String ?: "",
+                                songUrl = it["songUrl"] as? String ?: ""
+                            )
+                        }.toMutableList()
+
+                        // songs 포함된 Playlist 객체 생성
+                        val playlist = Playlist(title, picture, songs)
                         archiveList.add(playlist)
                     }
                     archiveAdapter.notifyDataSetChanged()
@@ -218,6 +249,13 @@ class ProfileFragment : Fragment() {
                 .addOnFailureListener {
                     Toast.makeText(requireContext(), "보관함 불러오기 실패", Toast.LENGTH_SHORT).show()
                 }
+        }
+
+        val selectedTab = arguments?.getString("selectedTab")
+        if (selectedTab == "archive") {
+            archiveTabButton.performClick()
+        } else {
+            diaryTabButton.performClick()
         }
     }
 }

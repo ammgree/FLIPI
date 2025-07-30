@@ -16,6 +16,10 @@ class FollowersListFragment : Fragment() {
     private lateinit var adapter: FollowUserAdapter
     private val followersList = mutableListOf<UserItem>()
 
+    private val db = FirebaseFirestore.getInstance()
+    private var userId: String? = null
+    private var currentUsername: String? = null  // 🔹 현재 로그인한 유저 이름
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -25,36 +29,64 @@ class FollowersListFragment : Fragment() {
         recyclerView = view.findViewById(R.id.followRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
+        userId = arguments?.getString("userId")
 
-        adapter = FollowUserAdapter(followersList) { username ->
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, OtherUserProfileFragment.newInstance(username))
-                .addToBackStack(null)
-                .commit()
+        // 🔸 로그인한 유저의 username을 가져온 뒤 Adapter 설정
+        FirebaseAuth.getInstance().currentUser?.uid?.let { uid ->
+            db.collection("users").document(uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    currentUsername = document.getString("username")
+
+                    // 🔸 어댑터 설정
+                    adapter = FollowUserAdapter(
+                        followersList,
+                        currentUsername,
+                        onNavigateToProfile = {
+                            parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragment_container, ProfileFragment())
+                                .addToBackStack(null)
+                                .commit()
+                        },
+                        onNavigateToOtherUser = { username ->
+                            parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragment_container, OtherUserProfileFragment.newInstance(username))
+                                .addToBackStack(null)
+                                .commit()
+                        }
+                    )
+
+                    recyclerView.adapter = adapter
+
+                    // 🔸 username을 가져온 뒤에 팔로워 불러오기
+                    loadFollowers()
+                }
         }
-
-
-
-        recyclerView.adapter = adapter
-
-        loadFollowers()
 
         return view
     }
 
     private fun loadFollowers() {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val db = FirebaseFirestore.getInstance()
+        val targetUserId = userId ?: return
 
-        db.collection("users").document(currentUserId).collection("followers")
+        db.collection("users").document(targetUserId).collection("followers")
             .get()
             .addOnSuccessListener { documents ->
                 followersList.clear()
-                for (doc in documents) {
-                    val user = doc.toObject(UserItem::class.java)
-                    followersList.add(user)
+
+                val userIds = documents.map { it.id }
+
+                for (userId in userIds) {
+                    db.collection("users").document(userId)
+                        .get()
+                        .addOnSuccessListener { userDoc ->
+                            val user = userDoc.toObject(UserItem::class.java)
+                            if (user != null) {
+                                followersList.add(user)
+                                adapter.notifyItemInserted(followersList.size - 1)
+                            }
+                        }
                 }
-                adapter.notifyDataSetChanged()
             }
     }
 }

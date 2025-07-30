@@ -15,11 +15,11 @@ import java.io.Serializable
 
 @Parcelize
 data class Album(
-    val title: String,
-    val artist: String,
+    val title: String = "",
+    val artist: String = "",
     val album: String = "",
-    var imageUrl: String,
-    val songUrl: String
+    var imageUrl: String = "",
+    val songUrl: String = ""
 ) : Parcelable, Serializable
 
 class AlbumAdapter(

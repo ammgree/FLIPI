@@ -7,15 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class FollowingListFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: FollowUserAdapter
-    private val followersList = mutableListOf<UserItem>()
+    private val followingList = mutableListOf<UserItem>()
+    private var currentUsername: String? = null
 
+
+    private val db = FirebaseFirestore.getInstance()
+    private var userId: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,12 +29,25 @@ class FollowingListFragment : Fragment() {
         recyclerView = view.findViewById(R.id.followRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        adapter = FollowUserAdapter(followersList) { username ->
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, OtherUserProfileFragment.newInstance(username))
-                .addToBackStack(null)
-                .commit()
-        }
+        userId = arguments?.getString("userId")
+
+        adapter = FollowUserAdapter(
+            followingList,
+            currentUsername,  // null이 아닌 값으로 정확히 설정되어 있어야 함!
+            onNavigateToProfile = {
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, ProfileFragment())
+                    .addToBackStack(null)
+                    .commit()
+            },
+            onNavigateToOtherUser = { username ->
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, OtherUserProfileFragment.newInstance(username))
+                    .addToBackStack(null)
+                    .commit()
+            }
+        )
+
 
         recyclerView.adapter = adapter
 
@@ -41,18 +57,26 @@ class FollowingListFragment : Fragment() {
     }
 
     private fun loadFollowing() {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val db = FirebaseFirestore.getInstance()
+        val targetUserId = userId ?: return
 
-        db.collection("users").document(currentUserId).collection("following")
+        db.collection("users").document(targetUserId).collection("following")
             .get()
             .addOnSuccessListener { documents ->
-                followersList.clear()
-                for (doc in documents) {
-                    val user = doc.toObject(UserItem::class.java)
-                    followersList.add(user)
+                followingList.clear()
+
+                val followingUserIds = documents.map { it.id }
+
+                for (followedUserId in followingUserIds) {
+                    db.collection("users").document(followedUserId)
+                        .get()
+                        .addOnSuccessListener { userDoc ->
+                            val user = userDoc.toObject(UserItem::class.java)
+                            if (user != null) {
+                                followingList.add(user)
+                                adapter.notifyDataSetChanged()
+                            }
+                        }
                 }
-                adapter.notifyDataSetChanged()
             }
     }
 }

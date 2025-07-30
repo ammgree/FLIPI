@@ -19,18 +19,7 @@
         android:layout_margin="16dp"
         android:contentDescription="뒤로가기" />
 
-    <!-- 검색 버튼 -->
-    <ImageButton
-        android:id="@+id/searchButton"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:background="@null"
-        android:src="@drawable/search"
-        app:tint="#FFFFFF"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp"
-        android:contentDescription="검색" />
+
 
     <!-- 프로필 이미지 -->
     <ImageView
@@ -189,5 +178,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
+
+    <!-- 보관함 목록 RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/archiveRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tabButtons"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -37,7 +37,14 @@ class UserSearchFragment : Fragment() {
         searchButton = view.findViewById(R.id.searchBtn)
         resultRecyclerView = view.findViewById(R.id.resultRecyclerView)
 
-        // 로그인한 유저의 username 미리 가져오기
+        val backButton = view.findViewById<ImageButton>(R.id.backButton)
+        backButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        resultRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        // 로그인한 유저의 username 미리 가져온 후 adapter 초기화
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
         if (currentUserUid != null) {
             FirebaseFirestore.getInstance().collection("users")
@@ -45,33 +52,28 @@ class UserSearchFragment : Fragment() {
                 .get()
                 .addOnSuccessListener { document ->
                     currentUsername = document.getString("username")
+
+                    // 어댑터 설정 (username 불러온 뒤!)
+                    adapter = FollowUserAdapter(
+                        userList,
+                        currentUsername,
+                        onNavigateToProfile = {
+                            parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragment_container, ProfileFragment())
+                                .addToBackStack(null)
+                                .commit()
+                        },
+                        onNavigateToOtherUser = { username ->
+                            parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragment_container, OtherUserProfileFragment.newInstance(username))
+                                .addToBackStack(null)
+                                .commit()
+                        }
+                    )
+
+                    resultRecyclerView.adapter = adapter
                 }
         }
-
-        val backButton = view.findViewById<ImageButton>(R.id.backButton)
-        backButton.setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-
-        // 어댑터 한 번만 설정
-        adapter = FollowUserAdapter(userList) { clickedUsername ->
-            if (clickedUsername == currentUsername) {
-                // 본인 → ProfileFragment
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, ProfileFragment())
-                    .addToBackStack(null)
-                    .commit()
-            } else {
-                // 다른 유저 → OtherUserProfileFragment
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, OtherUserProfileFragment.newInstance(clickedUsername))
-                    .addToBackStack(null)
-                    .commit()
-            }
-        }
-
-        resultRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        resultRecyclerView.adapter = adapter
 
         // 검색 버튼 클릭 시
         searchButton.setOnClickListener {
@@ -81,6 +83,7 @@ class UserSearchFragment : Fragment() {
             }
         }
     }
+
 
     private fun searchUsers(keyword: String) {
         FirebaseFirestore.getInstance().collection("users")

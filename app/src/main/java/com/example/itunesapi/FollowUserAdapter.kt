@@ -10,7 +10,9 @@ import com.bumptech.glide.Glide
 
 class FollowUserAdapter(
     private val userList: List<UserItem>,
-    private val onItemClick: (String) -> Unit // username만 넘김
+    private val currentUsername: String?,  // 현재 로그인한 사용자 이름
+    private val onNavigateToProfile: () -> Unit,  // 본인 프로필로 이동
+    private val onNavigateToOtherUser: (String) -> Unit  // 타인 프로필로 이동
 ) : RecyclerView.Adapter<FollowUserAdapter.FollowUserViewHolder>() {
 
     inner class FollowUserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -29,7 +31,11 @@ class FollowUserAdapter(
             }
 
             itemView.setOnClickListener {
-                onItemClick(user.username)
+                if (user.username == currentUsername) {
+                    onNavigateToProfile()
+                } else {
+                    onNavigateToOtherUser(user.username)
+                }
             }
         }
     }
