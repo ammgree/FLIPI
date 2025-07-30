@@ -26,6 +26,12 @@ class FollowersListFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_followers_list, container, false)
 
+        val backButton = view.findViewById<View>(R.id.btnBack)
+        backButton.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+
+
         recyclerView = view.findViewById(R.id.followRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
