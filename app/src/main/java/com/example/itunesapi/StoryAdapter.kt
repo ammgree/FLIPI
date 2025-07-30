@@ -8,6 +8,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
+data class SongItem(
+    val albumArtUrl: String,
+    val title: String,
+    val artist: String
+)
+
 class StoryAdapter(
     private val stories: List<StoryItem>,
     private val onItemClick: (StoryItem) -> Unit
@@ -34,7 +40,15 @@ class StoryAdapter(
         val story = stories[position]
         holder.titleText.text = story.title
         holder.artistText.text = story.artist
-        Glide.with(holder.itemView.context).load(story.albumArtUrl).into(holder.albumImage)
+
+        Glide.with(holder.itemView.context)
+            .load(story.albumArtUrl)   // 이미지 URL 넣기
+            .circleCrop()             // 원형 크롭 효과
+            .into(holder.albumImage)
+
+        holder.titleText.text = story.title
+        holder.artistText.text = story.artist
+
     }
 
     override fun getItemCount(): Int = stories.size

@@ -3,15 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/black"
     tools:context=".FocusModeFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
         android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@android:color/black">
 
         <!-- 1. 막대 그래프 -->
         <com.github.mikephil.charting.charts.BarChart
@@ -19,15 +20,17 @@
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp" />
 
         <!-- 2. 주제 추가 버튼 -->
         <Button
             android:id="@+id/btnAddTopic"
             android:text="주제 추가"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#333333"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
         <!-- 3. 주제별 집중 시간 리스트 -->
         <ScrollView
@@ -38,9 +41,16 @@
                 android:id="@+id/topicContainer"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:background="@android:color/black" />
         </ScrollView>
+
+        <Button
+            android:id="@+id/btnViewStats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="통계 보기"
+            android:layout_marginTop="16dp" />
+
     </LinearLayout>
-
-
 </FrameLayout>

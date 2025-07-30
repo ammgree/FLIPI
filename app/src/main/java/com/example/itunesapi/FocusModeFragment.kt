@@ -1,28 +1,26 @@
 package com.example.itunesapi
 
 import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
+import android.view.*
+import android.widget.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import java.text.SimpleDateFormat
+import java.util.*
 
 class FocusModeFragment : Fragment() {
 
     private lateinit var addTopicButton: Button
+    private lateinit var viewStatsButton: Button
     private lateinit var topicContainer: LinearLayout
-    private lateinit var viewModel: TimerViewModel
     private lateinit var barChart: BarChart
+    private lateinit var viewModel: TimerViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,13 +31,19 @@ class FocusModeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         addTopicButton = view.findViewById(R.id.btnAddTopic)
+        viewStatsButton = view.findViewById(R.id.btnViewStats)
         topicContainer = view.findViewById(R.id.topicContainer)
         barChart = view.findViewById(R.id.barChart)
 
         viewModel = ViewModelProvider(requireActivity())[TimerViewModel::class.java]
 
-        addTopicButton.setOnClickListener {
-            showAddTopicDialog()
+        addTopicButton.setOnClickListener { showAddTopicDialog() }
+
+        viewStatsButton.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, FocusStatsFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         viewModel.focusTimers.observe(viewLifecycleOwner) { topicMap ->
@@ -55,7 +59,8 @@ class FocusModeFragment : Fragment() {
                 text = "$topic (${formatTime(time)})"
                 setOnClickListener {
                     parentFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, FocusTimerFragment.newInstance(topic))
+                        .replace(R.id.fragment_container, FocusTimerFragment.newInstance(topic, "")
+                        )
                         .addToBackStack(null)
                         .commit()
                 }
@@ -67,7 +72,6 @@ class FocusModeFragment : Fragment() {
     private fun updateBarChart(topicMap: Map<String, Int>) {
         val entries = ArrayList<BarEntry>()
         val labels = ArrayList<String>()
-
         var index = 0f
         for ((topic, time) in topicMap) {
             entries.add(BarEntry(index, time.toFloat()))
@@ -93,9 +97,12 @@ class FocusModeFragment : Fragment() {
         xAxis.setDrawGridLines(false)
         xAxis.granularity = 1f
         xAxis.labelRotationAngle = -45f
+        xAxis.textColor = android.graphics.Color.WHITE
 
         barChart.axisLeft.axisMinimum = 0f
+        barChart.axisLeft.textColor = android.graphics.Color.WHITE
         barChart.axisRight.isEnabled = false
+        barChart.description.textColor = android.graphics.Color.WHITE
         barChart.invalidate()
     }
 
@@ -112,10 +119,44 @@ class FocusModeFragment : Fragment() {
             .show()
     }
 
-    private fun formatTime(minutes: Int): String {
-        val hours = minutes / 60
-        val mins = minutes % 60
-        return "${hours}시간 ${mins}분"
+    private fun formatTime(seconds: Int): String {
+        val minutes = seconds / 60
+        val secs = seconds % 60
+        return "${minutes}분 ${secs}초"
+    }
+
+    private val prefs by lazy {
+        requireContext().getSharedPreferences("FocusTimerPrefs", Context.MODE_PRIVATE)
+    }
+
+    private fun getTodayKey(topic: String): String {
+        val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        return "$topic-$date"
+    }
+
+    private fun saveTime(topic: String, seconds: Int) {
+        val key = getTodayKey(topic)
+        val current = prefs.getInt(key, 0)
+        prefs.edit().putInt(key, current + seconds).apply()
+    }
+
+    private fun loadTime(topic: String, date: String): Int {
+        val key = "$topic-$date"
+        return prefs.getInt(key, 0)
+    }
+
+    private fun loadTimeRange(topic: String, daysBack: Int): Map<String, Int> {
+        val map = mutableMapOf<String, Int>()
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val cal = Calendar.getInstance()
+        for (i in 0 until daysBack) {
+            val date = sdf.format(cal.time)
+            val key = "$topic-$date"
+            val value = prefs.getInt(key, 0)
+            map[date] = value
+            cal.add(Calendar.DATE, -1)
+        }
+        return map
     }
 }
 

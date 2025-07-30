@@ -10,9 +10,9 @@ class TimerViewModel : ViewModel() {
     private val _focusTimers = MutableLiveData<MutableMap<String, Int>>(mutableMapOf())
     val focusTimers: LiveData<MutableMap<String, Int>> get() = _focusTimers
 
-    fun updateTime(topic: String, minutes: Int) {
+    fun updateTime(topic: String, seconds: Int) {
         val current = _focusTimers.value ?: mutableMapOf()
-        current[topic] = (current[topic] ?: 0) + minutes
+        current[topic] = (current[topic] ?: 0) + seconds
         _focusTimers.value = current
     }
 
@@ -26,14 +26,16 @@ class TimerViewModel : ViewModel() {
         return _focusTimers.value?.get(topic) ?: 0
     }
 
-    // 💾 SharedPreferences 저장
+    // SharedPreferences 저장
     fun saveTimersToPrefs(context: Context) {
         _focusTimers.value?.let { TimerRepository.saveTimers(context, it) }
     }
 
-    // 📥 SharedPreferences 복원
+    // SharedPreferences 복원
     fun loadTimersFromPrefs(context: Context) {
         _focusTimers.value = TimerRepository.loadTimers(context)
+
     }
+
 }
 

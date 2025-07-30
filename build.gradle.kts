@@ -10,7 +10,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.google.gms:google-services:4.4.1") // ✅ Firebase 관련 classpath 추가
+        classpath("com.google.gms:google-services:4.4.1") // Firebase 관련 classpath 추가
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.7.5")
     }
 }
