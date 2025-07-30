@@ -20,10 +20,22 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // <도연>main에서 fragment_container로 바꿨습니다. (이렇게 해야 다른 프로그먼트로 이동할떄, 하단바가 안 사라져요)
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, HomeFragment())
-            .commit()
+        val mood = intent.getStringExtra("mood")
+        val username = intent.getStringExtra("username")
+
+        if(savedInstanceState == null && mood != null && username != null) {
+            val homeFragment = HomeFragment().apply {
+                arguments = Bundle().apply {
+                    putString("mood", mood)
+                    putString("username", username)
+                }
+            }
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, homeFragment)
+                .commit()
+        }
+
+
 
         // <도연>일기버튼 연결하겠습니다
         val dailyButton = findViewById<ImageButton>(R.id.nav_daily)
