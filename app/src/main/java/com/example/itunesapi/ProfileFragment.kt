@@ -36,6 +36,8 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+
         // 🔗 UI 연결
         backButton = view.findViewById(R.id.backButton)
         searchButton = view.findViewById(R.id.searchButton)
@@ -124,9 +126,19 @@ class ProfileFragment : Fragment() {
         }
 
         // 🔙 뒤로가기: 홈
+        val username = arguments?.getString("username") //homefragment에서받아왔음
+        val mood = arguments?.getString("mood")
+
         backButton.setOnClickListener {
+            val bundle = Bundle().apply { //이때 다시 보낸다~
+                putString("username", username)
+                putString("mood", mood)
+            }
+            val homeFragment = HomeFragment()
+            homeFragment.arguments = bundle
+
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment())
+                .replace(R.id.fragment_container, homeFragment)
                 .commit()
         }
 
