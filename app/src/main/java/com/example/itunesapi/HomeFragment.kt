@@ -105,8 +105,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
         }.start()
 
-
-
         // 1. 리사이클러뷰 설정: 스토리 목록 보여줌
         storyRecyclerView = view.findViewById(R.id.storyRecyclerView)
         storyRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -207,7 +205,5 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         return madeMap
     }
-
-
 }
 

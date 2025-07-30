@@ -25,6 +25,12 @@ class ViewPlaylistFragment : Fragment() {
     private lateinit var adapter: AlbumAdapter
     private lateinit var showPlaylistView: RecyclerView
     private lateinit var playlist: Playlist
+    private var origin: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        origin = arguments?.getString("origin")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,14 +62,20 @@ class ViewPlaylistFragment : Fragment() {
             }
 
             parentFragmentManager.setFragmentResult("songSelected", result)
-            val fm = parentFragmentManager
-            val popped = fm.popBackStackImmediate("FocusTimer", 0)
-            if (!popped) {
-                val fragment = FocusTimerFragment.newInstance(album.title, album.songUrl)
-                fm.beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .addToBackStack("FocusTimer")
-                    .commit()
+            if (origin == "FocusTimer") {
+                // FocusTimer가 스택에 있으면 pop하고 아니면 새로 띄우기
+                val popped = parentFragmentManager.popBackStackImmediate("FocusTimer", 0)
+                if (!popped) {
+                    val fragment = FocusTimerFragment.newInstance(album.title, album.songUrl)
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack("FocusTimer")
+                        .commit()
+                }
+            } else {
+                // origin이 FocusTimer가 아닐 경우, 뒤로가기나 화면 전환 하지 않음
+                // 필요하면 여기서 다른 동작 처리
+                // 예) Toast.makeText(requireContext(), "노래 선택 완료", Toast.LENGTH_SHORT).show()
             }
         }, { album ->
             AlertDialog.Builder(requireContext())

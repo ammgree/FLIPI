@@ -2,6 +2,7 @@ package com.example.itunesapi
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +21,13 @@ class StoreFragment : Fragment() {
 
     private lateinit var storeRecyclerView: RecyclerView
     private lateinit var adapter: PlaylistAdapter
+    private var origin: String? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        origin = arguments?.getString("origin")
+        Log.d("StoreFragment", "origin = $origin")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,12 +44,13 @@ class StoreFragment : Fragment() {
         storeRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         // 어댑터 설정
-        adapter = PlaylistAdapter(mainActivity.playLists, onItemClick =  { selectedPlaylist ->
+        adapter = PlaylistAdapter(mainActivity.playLists, onItemClick = { selectedPlaylist ->
             val bundle = Bundle().apply {
                 putSerializable("playlist", selectedPlaylist)
+                putString("origin", origin)
             }
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container,ViewPlaylistFragment().apply {
+                .replace(R.id.fragment_container, ViewPlaylistFragment().apply {
                     arguments = bundle
                 })
                 .addToBackStack(null)
@@ -77,7 +85,8 @@ class StoreFragment : Fragment() {
 
             builder.setPositiveButton("추가") { dialog, _ ->
                 val title = input.text.toString().ifBlank { "이름 없는 플레이리스트" }
-                val imageUrl = "https://picsum.photos/300/200?random=${System.currentTimeMillis()}" // 랜덤 이미지
+                val imageUrl =
+                    "https://picsum.photos/300/200?random=${System.currentTimeMillis()}" // 랜덤 이미지
                 val newPlaylist = Playlist(title, imageUrl)
 
                 mainActivity.playLists.add(0, newPlaylist) // 최신순 맨 위로
@@ -97,12 +106,12 @@ class StoreFragment : Fragment() {
                 )
 
                 val db = FirebaseFirestore.getInstance()
-               db.collection("users").document(uid)
-                   .collection("playlists")
-                   .add(explaylist)
-                   .addOnSuccessListener {
-                       Toast.makeText(requireContext(), "저장 성공!", Toast.LENGTH_SHORT).show()
-                   }
+                db.collection("users").document(uid)
+                    .collection("playlists")
+                    .add(explaylist)
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "저장 성공!", Toast.LENGTH_SHORT).show()
+                    }
 
                 dialog.dismiss()
             }
@@ -140,7 +149,7 @@ class StoreFragment : Fragment() {
                 for (doc in documents) {
                     val title = doc.getString("title") ?: ""
                     val picture = doc.getString("picture")
-                    val songsData = doc.get("songs") as? List<Map<String,Any>> ?: emptyList()
+                    val songsData = doc.get("songs") as? List<Map<String, Any>> ?: emptyList()
 
                     val songs = songsData.map {
                         Album(
@@ -151,11 +160,12 @@ class StoreFragment : Fragment() {
                             songUrl = it["songUrl"] as String
                         )
                     }.toMutableList()
-                    mainActivity.playLists.add(Playlist(title,picture,songs))
+                    mainActivity.playLists.add(Playlist(title, picture, songs))
                 }
                 adapter.notifyDataSetChanged()
             }
     }
+
     fun deletePlaylist(userId: String, playlistTitle: String, onComplete: () -> Unit) {
         val db = FirebaseFirestore.getInstance()
 
@@ -179,7 +189,6 @@ class StoreFragment : Fragment() {
     }
 
     private fun onSongSelected(songUrl: String, songTitle: String) {
-        // 결과 전달
         parentFragmentManager.setFragmentResult(
             "songSelected",
             Bundle().apply {
@@ -187,7 +196,13 @@ class StoreFragment : Fragment() {
                 putString("musicTitle", songTitle)
             }
         )
-        // 뒤로가기 (FocusTimerFragment로 복귀)
-        parentFragmentManager.popBackStack()
+
+        if (origin == "FocusTimer") {
+            // FocusTimerFragment에서 왔을 때만 뒤로 가기
+            parentFragmentManager.popBackStack()
+        } else {
+            // 그 외에는 아무것도 하지 않음
+            Log.d("StoreFragment", "Not from FocusTimer, so no popBackStack")
+        }
     }
 }
