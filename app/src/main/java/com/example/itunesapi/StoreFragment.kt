@@ -8,6 +8,8 @@ import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.replace
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.itunesapi.model.YoutubeVideoInfo
@@ -21,9 +23,17 @@ import org.json.JSONObject
 import java.net.URLEncoder
 
 class StoreFragment : Fragment() {
+
     private lateinit var storeRecyclerView: RecyclerView
     private lateinit var adapter: PlaylistAdapter
     private val client = OkHttpClient()
+    private var origin: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        origin = arguments?.getString("origin")
+        Log.d("StoreFragment", "origin = $origin")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -31,9 +41,11 @@ class StoreFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_store, container, false)
         val mainActivity = requireActivity() as MainActivity
 
+        // 뷰 바인딩
         val addButton = view.findViewById<ImageButton>(R.id.addPlaylist)
         val youtubeButton = view.findViewById<ImageButton>(R.id.mediaLinkButton)
         storeRecyclerView = view.findViewById(R.id.storeView)
+
         storeRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = PlaylistAdapter(mainActivity.playLists,
@@ -106,9 +118,11 @@ class StoreFragment : Fragment() {
             }
 
             builder.setNegativeButton("취소") { dialog, _ -> dialog.cancel() }
+
             builder.show()
         }
 
+        // 유튜브 버튼 눌렀을 때 동작 (검색 화면으로 이동할 수 있음)
         youtubeButton.setOnClickListener {
             val builder = AlertDialog.Builder(requireContext())
             builder.setTitle("유튜브 플레이리스트 URL 입력")
@@ -408,8 +422,10 @@ class StoreFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         storeRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+
         val mainActivity = requireActivity() as MainActivity
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
         mainActivity.playLists.clear()
 
         FirebaseFirestore.getInstance()
@@ -440,6 +456,7 @@ class StoreFragment : Fragment() {
 
     fun deletePlaylist(userId: String, playlistTitle: String, onComplete: () -> Unit) {
         val db = FirebaseFirestore.getInstance()
+
         db.collection("users").document(userId)
             .collection("playlists")
             .whereEqualTo("title", playlistTitle)
@@ -468,7 +485,13 @@ class StoreFragment : Fragment() {
                 putString("musicTitle", songTitle)
             }
         )
-        // 뒤로가기 (FocusTimerFragment로 복귀)
-        parentFragmentManager.popBackStack()
+
+        if (origin == "FocusTimer") {
+            // FocusTimerFragment에서 왔을 때만 뒤로 가기
+            parentFragmentManager.popBackStack()
+        } else {
+            // 그 외에는 아무것도 하지 않음
+            Log.d("StoreFragment", "Not from FocusTimer, so no popBackStack")
+        }
     }
 }
