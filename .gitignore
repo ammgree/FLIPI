@@ -13,7 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
-
 google-services.json
 flipi-596b5-firebase-adminsdk-fbsvc-05501da51b.json
 *.json
