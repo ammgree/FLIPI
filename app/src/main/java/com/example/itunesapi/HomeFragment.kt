@@ -271,15 +271,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val json = JSONObject(responseData)
                         if (!json.has("weather")) {
                             weatherTextView.text = "날씨 정보를 불러올 수 없습니다."
-                            Log.e("WeatherAPI", "No 'weather' field in response: $responseData")
                             return@runOnUiThread
                         }
 
                         val weatherArray = json.getJSONArray("weather")
                         val main = weatherArray.getJSONObject(0).getString("main")
                         val condition = WeatherUtil.classifyWeather(main)
-                        Log.d("fetchWeather", "main = $main, condition = $condition")
-                        weatherTextView.text = "현재 날씨는 $condition 입니다. \n이런 노래 어떠세요?"
+                        weatherTextView.text = "현재 지역은 $locationName, 날씨는 $condition 입니다. \n이런 노래 어떠세요?"
 
                         val weatherRecyclerView = requireView().findViewById<RecyclerView>(R.id.rcmdSongWeatherRecyclerView)
                         weatherRecyclerView.layoutManager = LinearLayoutManager(requireContext())
