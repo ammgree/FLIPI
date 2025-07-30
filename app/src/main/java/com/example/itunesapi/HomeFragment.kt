@@ -194,7 +194,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             val adapter = AlbumAdapter(
                                 albumList,
                                 onItemClick = { album ->
-                                    MusicPlayerManager.play(album.songUrl)
+                                    MusicPlayerManager.play(album)
                                 }
                             )
                             recyclerView.adapter = adapter

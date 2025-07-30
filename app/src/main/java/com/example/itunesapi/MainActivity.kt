@@ -1,10 +1,18 @@
 package com.example.itunesapi
 
 import android.os.Bundle
+import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
 
 class MainActivity : AppCompatActivity() {
     val playLists = mutableListOf<Playlist>()
@@ -34,6 +42,50 @@ class MainActivity : AppCompatActivity() {
                 .commit()
         }
 
+
+        val currentSong = findViewById<ConstraintLayout>(R.id.currentSong)
+        val songAlbum = findViewById<ImageView>(R.id.songAlbum)
+        val songTitle = findViewById<TextView>(R.id.songTitle)
+
+        val playButton = findViewById<ImageButton>(R.id.play)
+        val pauseButton = findViewById<ImageButton>(R.id.pause)
+
+        MusicPlayerManager.addOnPlayPauseChangeListener{ isPlaying ->
+            playButton.visibility = if (isPlaying) GONE else VISIBLE
+            pauseButton.visibility = if (isPlaying) VISIBLE else GONE
+        }
+
+        MusicPlayerManager.setOnStartListener {
+            runOnUiThread {
+                currentSong.visibility = VISIBLE
+                Glide.with(this)
+                    .load(MusicPlayerManager.song.imageUrl)
+                    .into(songAlbum)
+                songTitle.text = MusicPlayerManager.song.title
+            }
+        }
+
+        if (MusicPlayerManager.isPlaying()) {
+            currentSong.visibility = VISIBLE
+            Glide.with(this)
+                .load(MusicPlayerManager.song.imageUrl)
+                .into(songAlbum)
+            songTitle.text = MusicPlayerManager.song.title
+        } else {
+            currentSong.visibility = GONE
+        }
+
+        playButton.setOnClickListener {
+            MusicPlayerManager.resume()
+            playButton.visibility = GONE
+            pauseButton.visibility = VISIBLE
+        }
+
+        pauseButton.setOnClickListener {
+            MusicPlayerManager.pause()
+            playButton.visibility = VISIBLE
+            pauseButton.visibility = GONE
+        }
 
 
         // <도연>일기버튼 연결하겠습니다

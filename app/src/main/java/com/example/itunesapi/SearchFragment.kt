@@ -57,7 +57,7 @@ class SearchFragment : Fragment() {
             onItemClick = { album ->
                 adapter.selectAlbum(album)
                 addButton.visibility = View.VISIBLE
-                adapter.selectedAlbum?.songUrl?.let { MusicPlayerManager.play(it) }
+                adapter.selectedAlbum?.let { MusicPlayerManager.play(it) }
 
                 if (fromDiaryAdd) {
                     val resultBundle = Bundle().apply {

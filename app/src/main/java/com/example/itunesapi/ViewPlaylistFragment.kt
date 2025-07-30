@@ -45,7 +45,7 @@ class ViewPlaylistFragment : Fragment() {
 
         adapter = AlbumAdapter(albumList = playlist!!.songs, { album ->
             adapter.selectAlbum(album)
-            adapter.selectedAlbum?.songUrl?.let { MusicPlayerManager.play(it) }
+            adapter.selectedAlbum?.let { MusicPlayerManager.play(it) }
             val bundle = Bundle().apply {
                 putSerializable("playlist", playlist)
                 putSerializable("selectedAlbum", adapter.selectedAlbum)
