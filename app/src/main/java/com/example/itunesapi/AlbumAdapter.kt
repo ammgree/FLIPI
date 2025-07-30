@@ -11,16 +11,25 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 
 @Parcelize
-data class Album (val title: String, val artist: String, val album: String,
-             var imageUrl: String, val songUrl : String) : Parcelable
+data class Album(
+    val title: String,
+    val artist: String,
+    val album: String,
+    var imageUrl: String,
+    val songUrl: String
+) : Parcelable, Serializable
 
-class AlbumAdapter(private val albumList: List<Album> // 검색 결과 앨범 목록
-    , private val onItemClick: (Album) -> Unit) // 클릭했을 때 할 동작
-    //adapter 외부(Activity나 Fragment)에서 람다 형태로 클릭 동작을 넘길 수 있게 함
-    : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder>() {
-    var selectedAlbum : Album? = null
+class AlbumAdapter(
+    private val albumList: List<Album>,
+    private val onItemClick: (Album) -> Unit,
+    private val onItemLongClick: (Album) -> Unit = {} // 기본값 설정
+) : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder>() {
+
+    var selectedAlbum: Album? = null
+
     class AlbumViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // 뷰를 연결하기
         val albumArt: ImageView = itemView.findViewById(R.id.albumArt)
