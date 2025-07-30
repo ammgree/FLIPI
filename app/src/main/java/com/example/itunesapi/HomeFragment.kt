@@ -1,10 +1,5 @@
 package com.example.itunesapi
 
-import android.Manifest
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.Location
-import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -18,25 +13,21 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+
+
 // 데이터 모델 클래스: 스토리 아이템을 나타냄
 import android.os.Parcelable
-import android.util.Log
 import android.widget.TextView
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.json.JSONObject
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
-import com.example.itunesapi.BuildConfig
+
 
 @Parcelize
 data class StoryItem(
@@ -47,43 +38,73 @@ data class StoryItem(
 
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
-    private val db = FirebaseFirestore.getInstance()
 
-    private val storyList = mutableListOf<StoryItem>()
     private lateinit var storyRecyclerView: RecyclerView
+    private val db = FirebaseFirestore.getInstance()
+    private val storyList = mutableListOf<StoryItem>()
     private lateinit var storyAdapter: StoryAdapter
 
-    private val apiKey = BuildConfig.OWM_API_KEY
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var weatherTextView: TextView
-
+    // 1. fragment_home.xml을 inflate해서 view 반환
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
+
     }
 
-
+    // 2. UI가 완전히 그려진 후 뷰 작업 수행
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //MODD 기분기반노래추천 = $mood $usernme 님을 위한 노래 textveiw & recyclerView
+
+        //$mood $usernme 님을 위한 노래 textveiw & recyclerView
         val mood = arguments?.getString("mood") ?: ""
         val username = arguments?.getString("username") ?: ""
-
-        val moodRecyclerView = view.findViewById<RecyclerView>(R.id.rcmdSongRecyclerView)
-        moodRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        val recyclerView = view.findViewById<RecyclerView>(R.id.rcmdSongRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val rcmdMent = view.findViewById<TextView>(R.id.rcmdMent)
-        rcmdMent.text = "$mood $username 님을 위한 \n오늘의 노래추천 🎵"
+        rcmdMent.text = "$mood $username 님을 위한 \n 오늘의 노래추천 🎵"
 
-        RecommendSong(mood, moodRecyclerView, "mood")
+        Thread {
+            db.collection("songs")
+                .whereEqualTo("mood", mood)
+                .get()
+                .addOnSuccessListener { documents ->
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val searchKeywords = documents
+                            .mapNotNull { doc ->
+                                val title = doc.getString("title")
+                                val artist = doc.getString("artist")
+                                if (!title.isNullOrBlank() && !artist.isNullOrBlank()) {
+                                    "$title $artist"
+                                } else null
+                            }
+                            .shuffled()
+                            .take(5)
+                        val albumList = mutableListOf<Album>()
+                        searchKeywords.forEach { keyword ->
+                            val term = URLEncoder.encode(keyword, "UTF-8")
+                            val url = "https://itunes.apple.com/search?media=musicTrack&entity=song&country=kr&term=$term"
+                            val songMap = makeMap(url)
+                            songMap.values.firstOrNull()?.let { albumList.add(it) }
+                        }
+                        withContext(Dispatchers.Main) {
+                            val adapter = AlbumAdapter(
+                                albumList,
+                                onItemClick = { album ->
+                                    MusicPlayerManager.play(album.songUrl)
+                                }
+                            )
+                            recyclerView.adapter = adapter
 
-        //WEATHER 사용자 위치기반 날씨에 따른 노래추천
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext()) //위치클라이언트 초기화
-        weatherTextView = view.findViewById(R.id.rcmdMentWeather)
-        getLastLocation()
+
+                        }
+                    }
+                }
+        }.start()
+
 
 
 
@@ -154,46 +175,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         activity?.findViewById<View>(R.id.navigationBar)?.visibility = View.VISIBLE
     }
 
-    fun RecommendSong(value : String, recyclerView: RecyclerView, field : String){
-        Log.d("RecommendSong", "value: '$value', field: '$field'")
-        Thread {
-            db.collection("songs")
-                .whereEqualTo(field, value)
-                .get()
-                .addOnSuccessListener { documents ->
-                    Log.d("RecommendSong", "docs: ${documents.size()}")
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        val searchKeywords = documents
-                            .mapNotNull { doc ->
-                                val title = doc.getString("title")
-                                val artist = doc.getString("artist")
-                                if (!title.isNullOrBlank() && !artist.isNullOrBlank()) {
-                                    "$title $artist"
-                                } else null
-                            }
-                            .shuffled()
-                            .take(5)
-                        val albumList = mutableListOf<Album>()
-                        searchKeywords.forEach { keyword ->
-                            val term = URLEncoder.encode(keyword, "UTF-8")
-                            val url = "https://itunes.apple.com/search?media=musicTrack&entity=song&country=kr&term=$term"
-                            val songMap = makeMap(url)
-                            songMap.values.firstOrNull()?.let { albumList.add(it) }
-                        }
-                        withContext(Dispatchers.Main) {
-                            val adapter = AlbumAdapter(
-                                albumList,
-                                onItemClick = { album ->
-                                    MusicPlayerManager.play(album.songUrl)
-                                }
-                            )
-                            recyclerView.adapter = adapter
-                        }
-                    }
-                }
-        }.start()
-    }
-
     fun makeMap(urls:String) : Map<String, Album>{
         //URL 객체로 만들기
         val url = URL(urls)
@@ -228,83 +209,5 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         return madeMap
     }
 
-    private fun getLastLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                100
-            )
-            return
-        }
 
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            if (location == null) {
-                weatherTextView.text = "위치 정보를 받아올 수 없습니다 😱"
-                return@addOnSuccessListener
-            }
-            fetchWeather(location.latitude, location.longitude)
-        }
-    }
-
-    private fun fetchWeather(lat: Double, lon: Double) {
- Thread {
-            try {
-                val client = OkHttpClient()
-                val url =
-                    "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&lang=kr&units=metric"
-
-                val request = Request.Builder().url(url).build()
-                val response = client.newCall(request).execute()
-                val responseData = response.body?.string()
-
-                requireActivity().runOnUiThread {
-                    if (!response.isSuccessful || responseData == null) {
-                        weatherTextView.text = "날씨 API 호출 실패 (${response.code})"
-                        return@runOnUiThread
-                    }
-                    try {
-                        val json = JSONObject(responseData)
-                        if (!json.has("weather")) {
-                            weatherTextView.text = "날씨 정보를 불러올 수 없습니다."
-                            return@runOnUiThread
-                        }
-
-                        val weatherArray = json.getJSONArray("weather")
-                        val main = weatherArray.getJSONObject(0).getString("main")
-                        val condition = WeatherUtil.classifyWeather(main)
-                        weatherTextView.text = "현재 지역은 $locationName, 날씨는 $condition 입니다. \n이런 노래 어떠세요?"
-
-                        val weatherRecyclerView = requireView().findViewById<RecyclerView>(R.id.rcmdSongWeatherRecyclerView)
-                        weatherRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-                        RecommendSong(condition, weatherRecyclerView, "weather")
-
-                    } catch (e: Exception) {
-                        weatherTextView.text = "날씨 파싱 오류: ${e.message}"
-                    }
-                }
-            } catch (e: Exception) {
-                requireActivity().runOnUiThread {
-                    weatherTextView.text = "네트워크 오류: ${e.message}"
-                }
-            }
-        }.start()
-    }
-
-    // 권한 요청 결과 처리
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 100 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            getLastLocation()
-        } else {
-            weatherTextView.text = "위치 권한이 필요합니다."
-        }
-    }
 }
-

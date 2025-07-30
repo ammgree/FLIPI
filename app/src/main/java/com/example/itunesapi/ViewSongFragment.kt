@@ -23,7 +23,7 @@ class ViewSongFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_story_detail, container, false)
+        return inflater.inflate(R.layout.fragment_view_song, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -36,6 +36,11 @@ class ViewSongFragment : Fragment() {
         val playlist = arguments?.getSerializable("playlist") as? Playlist
         val album =arguments?.getSerializable("selectedAlbum") as? Album
 
+        val previous = view.findViewById<ImageButton>(R.id.skip_previous)
+        val playButton = view.findViewById<ImageButton>(R.id.play)
+        val pauseButton = view.findViewById<ImageButton>(R.id.pause)
+        val next = view.findViewById<ImageButton>(R.id.skip_next)
+
         playlist?.let {
             itplaylist = it
             itsonglist = it.songs
@@ -44,7 +49,35 @@ class ViewSongFragment : Fragment() {
             if (currentIndex == -1) currentIndex = 0
 
             updateSongUI(itsonglist[currentIndex])
+
+            previous.setOnClickListener {
+                if (currentIndex == 0)
+                    currentIndex = itsonglist.size-1
+                else
+                    currentIndex--
+                updateSongUI(itsonglist[currentIndex])
+            }
+
+            next.setOnClickListener {
+                if(currentIndex == itsonglist.size-1)
+                    currentIndex = 0
+                else
+                    currentIndex++
+                updateSongUI(itsonglist[currentIndex])
+            }
+
+            playButton.setOnClickListener {
+                MusicPlayerManager.resume()
+                playButton.visibility = View.GONE
+                pauseButton.visibility = View.VISIBLE
+            }
+            pauseButton.setOnClickListener {
+                MusicPlayerManager.pause()
+                playButton.visibility = View.VISIBLE
+                pauseButton.visibility = View.GONE
+            }
         }
+
         Backbtn.setOnClickListener{
             requireActivity().supportFragmentManager.popBackStack()
         }

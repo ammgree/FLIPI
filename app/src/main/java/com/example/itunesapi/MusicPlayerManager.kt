@@ -23,6 +23,14 @@ object MusicPlayerManager {
         mediaPlayer = null
     }
 
+    fun pause() {
+        mediaPlayer?.pause()
+    }
+
+    fun resume() {
+        mediaPlayer?.start()
+    }
+
     fun isPlaying(): Boolean {
         return mediaPlayer?.isPlaying == true
     }

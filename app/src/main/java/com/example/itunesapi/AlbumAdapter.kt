@@ -40,7 +40,7 @@ class AlbumAdapter(
 
 
         // 뷰에 앨범 데이터를 넣고 클릭 이벤트 설정
-        fun bind(album: Album, onClick: (Album) -> Unit, selectedAlbum: Album?) {
+        fun bind(album: Album, onClick: (Album) -> Unit, onItemLongClick: (Album) -> Unit, selectedAlbum: Album?) {
             albumTitle.text = album.title
             albumArtist.text = album.artist
             albumName.text = album.album
@@ -57,6 +57,10 @@ class AlbumAdapter(
             itemView.setOnClickListener {
                 onClick(album)
             }
+            itemView.setOnLongClickListener {
+                onItemLongClick(album)
+                true
+            }
         }
     }
 
@@ -71,7 +75,7 @@ class AlbumAdapter(
     override fun onBindViewHolder(holder: AlbumViewHolder, position: Int) {
         // position에 해당하는 데이터를 bind() 함수로 넘김
         // 실제 데이터가 뷰에 표시됨
-        holder.bind(albumList[position], onItemClick, selectedAlbum)
+        holder.bind(albumList[position], onItemClick, onItemLongClick, selectedAlbum)
     }
 
     // 전체 몇 개의 데이터를 보여줘야하는지 recyclerView가 알 수 있음
