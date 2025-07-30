@@ -5,6 +5,8 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import android.widget.*
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.github.mikephil.charting.charts.BarChart
@@ -59,7 +61,9 @@ class FocusModeFragment : Fragment() {
                 text = "$topic (${formatTime(time)})"
                 setOnClickListener {
                     parentFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, FocusTimerFragment.newInstance(topic, "")
+                        .replace(
+                            R.id.fragment_container,
+                            FocusTimerFragment.newInstance(topic, "", arrayListOf(), 0)
                         )
                         .addToBackStack(null)
                         .commit()
@@ -80,7 +84,7 @@ class FocusModeFragment : Fragment() {
         }
 
         val dataSet = BarDataSet(entries, "공부 시간 (분)").apply {
-            color = resources.getColor(R.color.teal_700, null)
+            color = ContextCompat.getColor(requireContext(), R.color.teal_700)
         }
 
         val data = BarData(dataSet)
@@ -159,6 +163,5 @@ class FocusModeFragment : Fragment() {
         return map
     }
 }
-
 
 

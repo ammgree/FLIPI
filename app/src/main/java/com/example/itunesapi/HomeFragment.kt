@@ -152,7 +152,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             db.collection("users").document(uid).get().addOnSuccessListener { document ->
                 val imageUrl = document.getString("profileImageUrl")
                 if (!imageUrl.isNullOrEmpty()) {
-                    Glide.with(this)
+                    Glide.with(view?.context ?: return@addOnSuccessListener)
                         .load(imageUrl)
                         .circleCrop()
                         .into(profileImageView)

@@ -40,42 +40,63 @@ class ViewPlaylistFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val goBackbtn = view.findViewById<ImageButton>(R.id.goBackbtn)
         val PlaylistName = view.findViewById<TextView>(R.id.PlaylistName)
-        val showPlaylistView = view.findViewById<RecyclerView>(R.id.showPlaylistView)
-
+        showPlaylistView = view.findViewById(R.id.showPlaylistView)
+        showPlaylistView.layoutManager = LinearLayoutManager(requireContext())
 
         val playlist = arguments?.getSerializable("playlist") as? Playlist
         playlist?.let {
             PlaylistName.text = it.title;
         }
-        showPlaylistView.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = AlbumAdapter(albumList = playlist!!.songs, { album ->
             adapter.selectAlbum(album)
+
+            val albumList = ArrayList(playlist.songs)
+            val currentIndex = albumList.indexOf(album)
+
+// Album 리스트를 SongItem 리스트로 변환
+            val songItemList = albumList.map { album ->
+                SongItem(
+                    url = album.songUrl,
+                    title = album.title,
+                    artist = album.artist,
+                    albumArtUrl = album.imageUrl
+                )
+            }.toCollection(ArrayList())
 
             val result = Bundle().apply {
                 putString("musicTitle", album.title)
                 putString("musicUrl", album.songUrl)
                 putString("musicArtist", album.artist)
                 putString("albumArtUrl", album.imageUrl)
+                putSerializable("albumList", albumList)
+                putInt("currentIndex", currentIndex)
             }
 
             parentFragmentManager.setFragmentResult("songSelected", result)
+
             if (origin == "FocusTimer") {
-                // FocusTimer가 스택에 있으면 pop하고 아니면 새로 띄우기
+                // 타이머에서 왔으면 타이머 화면으로 돌아가기 or 새로 띄우기
                 val popped = parentFragmentManager.popBackStackImmediate("FocusTimer", 0)
                 if (!popped) {
-                    val fragment = FocusTimerFragment.newInstance(album.title, album.songUrl)
+                    val fragment = FocusTimerFragment.newInstance(
+                        album.title,
+                        album.songUrl,
+                        songItemList,
+                        currentIndex
+                    )
                     parentFragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, fragment)
                         .addToBackStack("FocusTimer")
                         .commit()
                 }
             } else {
-                // origin이 FocusTimer가 아닐 경우, 뒤로가기나 화면 전환 하지 않음
-                // 필요하면 여기서 다른 동작 처리
-                // 예) Toast.makeText(requireContext(), "노래 선택 완료", Toast.LENGTH_SHORT).show()
+                // 타이머에서 온 게 아니면 현재 화면 내에서 노래 재생만 처리
+                Toast.makeText(requireContext(), "${album.title} 재생", Toast.LENGTH_SHORT).show()
+                // 음악 재생 관련 메서드 호출 가능 (예: playMusic(album))
             }
         }, { album ->
             AlertDialog.Builder(requireContext())

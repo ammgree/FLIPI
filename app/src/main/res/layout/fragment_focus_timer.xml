@@ -13,7 +13,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="요가"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -102,7 +101,7 @@
             android:layout_marginStart="12dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="재생 중: 없음"
+            android:text="없음"
             android:textSize="16sp" />
     </LinearLayout>
 

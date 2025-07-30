@@ -45,15 +45,24 @@ class StoreFragment : Fragment() {
 
         // 어댑터 설정
         adapter = PlaylistAdapter(mainActivity.playLists, onItemClick = { selectedPlaylist ->
-            val bundle = Bundle().apply {
-                putSerializable("playlist", selectedPlaylist)
-                putString("origin", origin)
+            // 앨범 리스트 가져오기
+            val albumList = ArrayList<Album>(selectedPlaylist.songs)
+
+            // 첫 번째 노래 정보
+            val index = 0
+            val subject = albumList[0].title
+            val musicUrl = albumList[0].songUrl
+
+            val fragment = ViewPlaylistFragment().apply {
+                arguments = Bundle().apply {
+                    putSerializable("playlist", selectedPlaylist)
+                    putString("origin", origin) // origin 유지해서 넘기기
+                }
             }
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ViewPlaylistFragment().apply {
-                    arguments = bundle
-                })
-                .addToBackStack(null)
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack("ViewPlaylistFragment")
                 .commit()
         }, onItemLongClick = { playlist ->
             AlertDialog.Builder(requireContext())
