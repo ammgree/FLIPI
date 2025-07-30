@@ -15,16 +15,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.io.Serializable
 
-data class ViewPlaylist(
-    val title: String,
-    val songs: List<Album>
-) : Serializable
-
 class ViewPlaylistFragment : Fragment() {
 
     private lateinit var adapter: AlbumAdapter
-    private lateinit var showPlaylistView: RecyclerView
-    private lateinit var playlist: Playlist
     private var origin: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,30 +46,17 @@ class ViewPlaylistFragment : Fragment() {
 
         adapter = AlbumAdapter(albumList = playlist!!.songs, { album ->
             adapter.selectAlbum(album)
-
-            val result = Bundle().apply {
-                putString("musicTitle", album.title)
-                putString("musicUrl", album.songUrl)
-                putString("musicArtist", album.artist)
-                putString("albumArtUrl", album.imageUrl)
+            adapter.selectedAlbum?.songUrl?.let { MusicPlayerManager.play(it) }
+            val bundle = Bundle().apply {
+                putSerializable("playlist", playlist)
+                putSerializable("selectedAlbum", adapter.selectedAlbum)
             }
-
-            parentFragmentManager.setFragmentResult("songSelected", result)
-            if (origin == "FocusTimer") {
-                // FocusTimer가 스택에 있으면 pop하고 아니면 새로 띄우기
-                val popped = parentFragmentManager.popBackStackImmediate("FocusTimer", 0)
-                if (!popped) {
-                    val fragment = FocusTimerFragment.newInstance(album.title, album.songUrl)
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, fragment)
-                        .addToBackStack("FocusTimer")
-                        .commit()
-                }
-            } else {
-                // origin이 FocusTimer가 아닐 경우, 뒤로가기나 화면 전환 하지 않음
-                // 필요하면 여기서 다른 동작 처리
-                // 예) Toast.makeText(requireContext(), "노래 선택 완료", Toast.LENGTH_SHORT).show()
-            }
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container,ViewSongFragment().apply {
+                    arguments = bundle
+                })
+                .addToBackStack(null)
+                .commit()
         }, { album ->
             AlertDialog.Builder(requireContext())
                 .setTitle("노래 삭제")

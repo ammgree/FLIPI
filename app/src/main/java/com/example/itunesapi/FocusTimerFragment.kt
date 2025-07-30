@@ -14,7 +14,6 @@ import com.bumptech.glide.Glide
 import com.example.itunesapi.databinding.FragmentFocusTimerBinding
 import java.text.SimpleDateFormat
 import java.util.*
-import com.example.itunesapi.SongItem
 
 class FocusTimerFragment : Fragment() {
 
@@ -26,7 +25,7 @@ class FocusTimerFragment : Fragment() {
     private var elapsedSeconds = 0
     private var isRunning = false
 
-    private var playlist: List<SongItem> = emptyList()
+    private var playlist: List<Album> = emptyList()
     private var currentIndex = 0
 
     private lateinit var subjectName: String
@@ -124,14 +123,14 @@ class FocusTimerFragment : Fragment() {
 
     private fun updateAndPlayCurrentSong() {
         val song = playlist[currentIndex]
-        musicUrl = song.url
+        musicUrl = song.songUrl
         subjectName = song.title
 
         // UI 업데이트
         binding.currentMusicBox.visibility = View.VISIBLE
         binding.tvCurrentMusicTitle.text = "재생 중: ${song.title} - ${song.artist}"
         Glide.with(this)
-            .load(song.albumArtUrl)
+            .load(song.imageUrl)
             .placeholder(R.drawable.music_note)
             .into(binding.albumArt)
 
@@ -209,7 +208,7 @@ class FocusTimerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         parentFragmentManager.setFragmentResultListener("songSelected", viewLifecycleOwner) { _, bundle ->
-            val musicList = bundle.getParcelableArrayList<SongItem>("playlist")
+            val musicList = bundle.getParcelableArrayList<Album>("playlist")
             val selectedIndex = bundle.getInt("selectedIndex", 0)
 
             if (musicList != null) {
