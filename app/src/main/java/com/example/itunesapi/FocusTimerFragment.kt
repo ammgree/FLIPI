@@ -1,180 +1,206 @@
 package com.example.itunesapi
 
-import android.app.Activity
-import android.content.Intent
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.itunesapi.databinding.FragmentFocusTimerBinding
+import java.text.SimpleDateFormat
+import java.util.*
 
 class FocusTimerFragment : Fragment() {
 
-    private lateinit var viewModel: TimerViewModel
-    private var topic: String? = null
-    private var secondsPassed = 0
-    private var isRunning = false
-    private lateinit var handler: Handler
-    private lateinit var runnable: Runnable
-
-    private lateinit var tvTimer: TextView
-    private lateinit var tvTopicTitle: TextView
-    private lateinit var btnStart: Button
-    private lateinit var btnStop: Button
+    private var _binding: FragmentFocusTimerBinding? = null
+    private val binding get() = _binding!!
 
     private var mediaPlayer: MediaPlayer? = null
-    private var currentSongUrl: String? = null
-    private var currentSongTitle: String? = null
-    private var isPlaying = false
+    private var timer: CountDownTimer? = null
+    private var elapsedSeconds = 0
+    private var isRunning = false
 
-    private lateinit var tvCurrentSong: TextView
-    private lateinit var btnPlayPause: Button
-    private lateinit var btnPrevSong: Button
-    private lateinit var btnNextSong: Button
-    private lateinit var btnMusic: Button
+    private lateinit var subjectName: String
+    private lateinit var musicUrl: String
+
+    private lateinit var timerViewModel: TimerViewModel
 
     companion object {
-        fun newInstance(topic: String): FocusTimerFragment {
+        private const val ARG_TOPIC = "subject"
+        private const val ARG_MUSIC = "musicUrl"
+
+        fun newInstance(subject: String, musicUrl: String): FocusTimerFragment {
             val fragment = FocusTimerFragment()
-            val args = Bundle()
-            args.putString("topic", topic)
+            val args = Bundle().apply {
+                putString(ARG_TOPIC, subject)
+                putString(ARG_MUSIC, musicUrl)
+            }
             fragment.arguments = args
             return fragment
         }
     }
 
-    private val musicLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            val selectedSongTitle = data?.getStringExtra("selectedSongTitle") ?: "선택된 노래 없음"
-            tvCurrentSong.text = selectedSongTitle
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        topic = arguments?.getString("topic")
-        viewModel = ViewModelProvider(requireActivity())[TimerViewModel::class.java]
-        handler = Handler(Looper.getMainLooper())
-
-        // 🔁 타이머 저장값 복원
-        viewModel.loadTimersFromPrefs(requireContext())
+        timerViewModel = ViewModelProvider(requireActivity())[TimerViewModel::class.java]
+        arguments?.let {
+            subjectName = it.getString(ARG_TOPIC) ?: "기본"
+            musicUrl = it.getString(ARG_MUSIC) ?: ""
+        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.fragment_focus_timer, container, false)
+        _binding = FragmentFocusTimerBinding.inflate(inflater, container, false)
 
-        tvTimer = view.findViewById(R.id.tvTimer)
-        tvTopicTitle = view.findViewById(R.id.tvTopicTitle)
-        btnStart = view.findViewById(R.id.btnStart)
-        btnStop = view.findViewById(R.id.btnStop)
+        // 주제 이름 화면에 표시 (예: 텍스트뷰)
+        binding.tvTopicTitle.text = subjectName  // tvSubjectName은 xml에 정의된 TextView id
 
-        tvCurrentSong = view.findViewById(R.id.tvCurrentMusicTitle)
-        btnPlayPause = view.findViewById(R.id.btnPlayPause)
-        btnPrevSong = view.findViewById(R.id.btnPrev)
-        btnNextSong = view.findViewById(R.id.btnNext)
-        btnMusic = view.findViewById(R.id.btnMusic)
-
-        tvTopicTitle.text = topic ?: "주제 없음"
-        tvTimer.text = formatTime(secondsPassed)
-        updateMusicUI()
-        updatePlayPauseButton()
-
-        runnable = object : Runnable {
-            override fun run() {
-                if (isRunning) {
-                    secondsPassed++
-                    tvTimer.text = formatTime(secondsPassed)
-                    handler.postDelayed(this, 1000)
-                }
-            }
-        }
-
-        btnStart.setOnClickListener {
+        // 초기 타이머, 음악은 실행하지 않고, 버튼 클릭으로 시작하도록 세팅
+        binding.btnStart.setOnClickListener {
             if (!isRunning) {
+                startTimer()
+                playMusic()
                 isRunning = true
-                handler.post(runnable)
+                binding.btnStart.isEnabled = false  // 시작 버튼 비활성화 (중복 실행 방지)
             }
         }
 
-        btnStop.setOnClickListener {
-            isRunning = false
-            handler.removeCallbacks(runnable)
-        }
+        binding.btnStop.setOnClickListener {
+            if (isRunning) {
+                stopTimer()
+                stopMusic()
+                isRunning = false
+                binding.btnStart.isEnabled = true  // 다시 시작 가능하도록
 
-        btnPlayPause.setOnClickListener {
-            if (mediaPlayer == null) return@setOnClickListener
-            if (isPlaying) {
-                mediaPlayer?.pause()
-            } else {
-                mediaPlayer?.start()
+                saveTime(subjectName, elapsedSeconds)
+                timerViewModel.updateTime(subjectName, elapsedSeconds)
+                Toast.makeText(requireContext(), "공부 기록 저장됨!", Toast.LENGTH_SHORT).show()
             }
-            isPlaying = !isPlaying
-            updatePlayPauseButton()
         }
 
-        btnPrevSong.setOnClickListener {
-            // 이전곡 기능 구현 예정
-        }
+        binding.tvTimer.text = "00:00"
 
-        btnNextSong.setOnClickListener {
-            // 다음곡 기능 구현 예정
-        }
-
-        return view
+        return binding.root
     }
 
-    override fun onStop() {
-        super.onStop()
-        viewModel.saveTimersToPrefs(requireContext())
+    private fun setupViews() {
+        binding.btnMusic.setOnClickListener {
+            // StoreFragment로 이동
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, StoreFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.btnStart.setOnClickListener {
+            startTimer()
+            playMusic()
+        }
+
+        binding.btnStop.setOnClickListener {
+            stopTimer()
+            stopMusic()
+            saveTime(subjectName, elapsedSeconds)
+            Toast.makeText(requireContext(), "공부 기록 저장됨!", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun startTimer() {
+        timer = object : CountDownTimer(3600000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                elapsedSeconds++
+                val minutes = elapsedSeconds / 60
+                val seconds = elapsedSeconds % 60
+                binding.tvTimer.text = String.format("%02d:%02d", minutes, seconds)
+            }
+
+            override fun onFinish() {
+                stopMusic()
+                saveTime(subjectName, elapsedSeconds)
+                Toast.makeText(requireContext(), "1시간 완료!", Toast.LENGTH_SHORT).show()
+                isRunning = false
+                binding.btnStart.isEnabled = true
+            }
+        }
+        timer?.start()
+    }
+
+    private fun playMusic() {
+        if (musicUrl.isBlank()) return
+
+        mediaPlayer = MediaPlayer().apply {
+            setAudioStreamType(AudioManager.STREAM_MUSIC)
+            setDataSource(musicUrl)
+            prepareAsync()
+            setOnPreparedListener { it.start() }
+            setOnErrorListener { _, _, _ ->
+                Toast.makeText(requireContext(), "음악 재생 실패", Toast.LENGTH_SHORT).show()
+                true
+            }
+        }
+    }
+
+    private fun stopMusic() {
+        mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = null
+    }
 
-        topic?.let {
-            val minutes = secondsPassed / 60
-            viewModel.updateTime(it, minutes)
+    private fun stopTimer() {
+        timer?.cancel()
+        timer = null
+    }
+
+    private fun saveTime(topic: String, seconds: Int) {
+        val prefs = requireContext().getSharedPreferences("FocusTimerPrefs", 0)
+        val editor = prefs.edit()
+
+        val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val key = "$topic-$date"
+        val previousTime = prefs.getInt(key, 0)
+        val newTime = previousTime + seconds
+        editor.putInt(key, newTime).apply()
+
+        Toast.makeText(requireContext(), "[$key] $newTime 저장됨", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        stopMusic()
+        stopTimer()
+        _binding = null
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // FragmentResultListener 등록
+        parentFragmentManager.setFragmentResultListener("songSelected", viewLifecycleOwner) { key, bundle ->
+            val musicUrl = bundle.getString("musicUrl") ?: ""
+            val musicTitle = bundle.getString("musicTitle") ?: ""
+
+            this.musicUrl = musicUrl
+            this.subjectName = musicTitle // 필요시 제목도 저장
+
+            Toast.makeText(requireContext(), "노래 선택됨: $musicTitle", Toast.LENGTH_SHORT).show()
+
+            // 음악 재생 재시작
+            stopMusic()
+            playMusic()
+        }
+        binding.btnMusic.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, StoreFragment())
+                .addToBackStack(null)
+                .commit()
         }
     }
 
-    private fun prepareMediaPlayer(url: String) {
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(url)
-            prepare()
-        }
-        isPlaying = false
-        updatePlayPauseButton()
-    }
-
-    private fun updateMusicUI() {
-        tvCurrentSong.text = currentSongTitle ?: "선택된 노래 없음"
-    }
-
-    private fun updatePlayPauseButton() {
-        btnPlayPause.text = if (isPlaying) "정지" else "재생"
-    }
-
-    private fun formatTime(seconds: Int): String {
-        val minutes = seconds / 60
-        val remainingSeconds = seconds % 60
-        return String.format("%02d:%02d", minutes, remainingSeconds)
-    }
 }
-
-

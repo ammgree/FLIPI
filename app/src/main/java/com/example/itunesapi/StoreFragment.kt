@@ -169,4 +169,16 @@ class StoreFragment : Fragment() {
             }
     }
 
+    private fun onSongSelected(songUrl: String, songTitle: String) {
+        // 결과 전달
+        parentFragmentManager.setFragmentResult(
+            "songSelected",
+            Bundle().apply {
+                putString("musicUrl", songUrl)
+                putString("musicTitle", songTitle)
+            }
+        )
+        // 뒤로가기 (FocusTimerFragment로 복귀)
+        parentFragmentManager.popBackStack()
+    }
 }
