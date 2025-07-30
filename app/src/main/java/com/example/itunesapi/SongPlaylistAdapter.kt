@@ -7,14 +7,15 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class SongPlaylistAdapter(
-    private val songs: List<StoryItem>
+    private val songs: MutableList<Album>,
+    private val onItemClick: (Album) -> Unit
 ) : RecyclerView.Adapter<SongPlaylistAdapter.SongViewHolder>() {
 
     class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val songTitle: TextView = itemView.findViewById(R.id.songTitle)
         private val songArtist: TextView = itemView.findViewById(R.id.songArtist)
 
-        fun bind(item: StoryItem) {
+        fun bind(item: Album) {
             songTitle.text = item.title
             songArtist.text = item.artist
         }

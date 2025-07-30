@@ -4,56 +4,58 @@
     android:id="@+id/focusTimerRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:orientation="vertical">
+    android:background="@color/black"
+    android:orientation="vertical"
+    android:padding="24dp">
 
     <TextView
         android:id="@+id/tvTopicTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:text="요가"
         android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_gravity="center"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvTimer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="00:00"
-        android:textSize="48sp"
+        android:layout_marginTop="32dp"
         android:gravity="center"
-        android:layout_marginTop="32dp"/>
+        android:text="00:00"
+        android:textColor="@color/white"
+        android:textSize="48sp" />
 
     <Button
         android:id="@+id/btnStart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="시작"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="24dp"
+        android:text="시작" />
 
     <Button
         android:id="@+id/btnStop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="정지"
-        android:layout_marginTop="12dp"/>
+        android:layout_marginTop="12dp"
+        android:text="정지" />
 
     <Button
         android:id="@+id/btnMusic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Music"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="24dp"
+        android:text="Music" />
 
     <!-- 음악 재생 UI -->
     <LinearLayout
         android:id="@+id/musicControls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_marginTop="12dp"
         android:gravity="center"
-        android:layout_marginTop="12dp">
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btnPrev"
@@ -65,9 +67,9 @@
             android:id="@+id/btnPlayPause"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="재생"
             android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"/>
+            android:layout_marginRight="16dp"
+            android:text="재생" />
 
         <Button
             android:id="@+id/btnNext"
@@ -81,11 +83,11 @@
         android:id="@+id/currentMusicBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="#EEEEEE"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="12dp"
-        android:gravity="center_vertical"
-        android:background="#EEEEEE"
-        android:layout_marginTop="16dp"
         android:visibility="visible">
 
         <ImageView
@@ -97,11 +99,11 @@
             android:id="@+id/tvCurrentMusicTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="재생 중: 없음"
-            android:textSize="16sp"
             android:layout_marginStart="12dp"
             android:ellipsize="end"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:text="재생 중: 없음"
+            android:textSize="16sp" />
     </LinearLayout>
 
 </LinearLayout>

@@ -15,5 +15,6 @@
 local.properties
 google-services.json
 flipi-596b5-firebase-adminsdk-fbsvc-05501da51b.json
+app/src/main/assets/secret_keys.json
 *.json
 

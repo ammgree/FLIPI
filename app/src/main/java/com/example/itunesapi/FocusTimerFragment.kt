@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.itunesapi.databinding.FragmentFocusTimerBinding
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,6 +24,9 @@ class FocusTimerFragment : Fragment() {
     private var timer: CountDownTimer? = null
     private var elapsedSeconds = 0
     private var isRunning = false
+
+    private var playlist: List<Album> = emptyList()
+    private var currentIndex = 0
 
     private lateinit var subjectName: String
     private lateinit var musicUrl: String
@@ -92,24 +96,46 @@ class FocusTimerFragment : Fragment() {
 
     private fun setupViews() {
         binding.btnMusic.setOnClickListener {
-            // StoreFragment로 이동
+            val storeFragment = StoreFragment()
+            storeFragment.arguments = Bundle().apply {
+                putString("origin", "FocusTimer")  // 출처 정보 전달
+            }
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, StoreFragment())
-                .addToBackStack(null)
+                .replace(R.id.fragment_container, storeFragment)
+                .addToBackStack("StoreFragment")
                 .commit()
         }
 
-        binding.btnStart.setOnClickListener {
-            startTimer()
-            playMusic()
+        binding.btnPrev.setOnClickListener {
+            if (playlist.isNotEmpty()) {
+                currentIndex = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
+                updateAndPlayCurrentSong()
+            }
         }
 
-        binding.btnStop.setOnClickListener {
-            stopTimer()
-            stopMusic()
-            saveTime(subjectName, elapsedSeconds)
-            Toast.makeText(requireContext(), "공부 기록 저장됨!", Toast.LENGTH_SHORT).show()
+        binding.btnNext.setOnClickListener {
+            if (playlist.isNotEmpty()) {
+                currentIndex = (currentIndex + 1) % playlist.size
+                updateAndPlayCurrentSong()
+            }
         }
+    }
+
+    private fun updateAndPlayCurrentSong() {
+        val song = playlist[currentIndex]
+        musicUrl = song.songUrl
+        subjectName = song.title
+
+        // UI 업데이트
+        binding.currentMusicBox.visibility = View.VISIBLE
+        binding.tvCurrentMusicTitle.text = "재생 중: ${song.title} - ${song.artist}"
+        Glide.with(this)
+            .load(song.imageUrl)
+            .placeholder(R.drawable.music_note)
+            .into(binding.albumArt)
+
+        stopMusic()
+        playMusic()
     }
 
     private fun startTimer() {
@@ -181,26 +207,38 @@ class FocusTimerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // FragmentResultListener 등록
-        parentFragmentManager.setFragmentResultListener("songSelected", viewLifecycleOwner) { key, bundle ->
-            val musicUrl = bundle.getString("musicUrl") ?: ""
-            val musicTitle = bundle.getString("musicTitle") ?: ""
+        parentFragmentManager.setFragmentResultListener("songSelected", viewLifecycleOwner) { _, bundle ->
+            val musicList = bundle.getParcelableArrayList<Album>("playlist")
+            val selectedIndex = bundle.getInt("selectedIndex", 0)
 
-            this.musicUrl = musicUrl
-            this.subjectName = musicTitle // 필요시 제목도 저장
+            if (musicList != null) {
+                playlist = musicList
+                currentIndex = selectedIndex
+                updateAndPlayCurrentSong()
+            } else {
+                // 예전 방식 호환용 (단일 곡만 받았을 경우)
+                val musicUrl = bundle.getString("musicUrl") ?: ""
+                val musicTitle = bundle.getString("musicTitle") ?: ""
+                val musicArtist = bundle.getString("musicArtist") ?: ""
+                val albumArtUrl = bundle.getString("albumArtUrl") ?: ""
 
-            Toast.makeText(requireContext(), "노래 선택됨: $musicTitle", Toast.LENGTH_SHORT).show()
+                this.musicUrl = musicUrl
+                this.subjectName = musicTitle
 
-            // 음악 재생 재시작
-            stopMusic()
-            playMusic()
+                binding.currentMusicBox.visibility = View.VISIBLE
+                binding.tvCurrentMusicTitle.text = "재생 중: $musicTitle - $musicArtist"
+
+                Glide.with(this)
+                    .load(albumArtUrl)
+                    .placeholder(R.drawable.music_note)
+                    .into(binding.albumArt)
+
+                stopMusic()
+                playMusic()
+            }
         }
-        binding.btnMusic.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, StoreFragment())
-                .addToBackStack(null)
-                .commit()
-        }
+
+        setupViews()
     }
 
 }

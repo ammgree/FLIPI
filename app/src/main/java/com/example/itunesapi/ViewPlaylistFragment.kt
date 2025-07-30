@@ -13,16 +13,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.io.Serializable
 
 class ViewPlaylistFragment : Fragment() {
 
     private lateinit var adapter: AlbumAdapter
+    private var origin: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        origin = arguments?.getString("origin")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_view_playlist, container, false)
     }
 
@@ -30,6 +36,7 @@ class ViewPlaylistFragment : Fragment() {
         val goBackbtn = view.findViewById<ImageButton>(R.id.goBackbtn)
         val PlaylistName = view.findViewById<TextView>(R.id.PlaylistName)
         val showPlaylistView = view.findViewById<RecyclerView>(R.id.showPlaylistView)
+
 
         val playlist = arguments?.getSerializable("playlist") as? Playlist
         playlist?.let {
