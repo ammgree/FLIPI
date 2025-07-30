@@ -36,7 +36,6 @@ import com.google.android.gms.location.LocationServices
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
-import com.example.itunesapi.BuildConfig
 import android.location.Geocoder
 import java.util.Locale
 
@@ -63,25 +62,31 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var weatherTextView: TextView
 
+
+
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
+
     }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val mood = arguments?.getString("mood") ?: "" //이걸 먼저 받을게욤
+        val username = arguments?.getString("username") ?: ""
 
         KeyManager.init(requireContext())
         weatherApiKey = KeyManager.get("OWM_API_KEY")
 
 
         //MODD 기분기반노래추천 = $mood $usernme 님을 위한 노래 textveiw & recyclerView
-        val mood = arguments?.getString("mood") ?: ""
-        val username = arguments?.getString("username") ?: ""
+
 
         val moodRecyclerView = view.findViewById<RecyclerView>(R.id.rcmdSongRecyclerView)
         moodRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -145,7 +150,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             db.collection("users").document(uid).get().addOnSuccessListener { document ->
                 val imageUrl = document.getString("profileImageUrl")
                 if (!imageUrl.isNullOrEmpty()) {
-                    Glide.with(this)
+                    Glide.with(view?.context ?: return@addOnSuccessListener)
                         .load(imageUrl)
                         .circleCrop()
                         .into(profileImageView)
@@ -155,8 +160,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         // 4. 프로필 이미지 클릭 → 프로필 프래그먼트로 이동
         profileImageView.setOnClickListener {
+            val bundle = Bundle().apply { //이때 걍 정보도 같이 보낼겜
+                putString("username", username)
+                putString("mood", mood)
+            }
+            val profileFragment = ProfileFragment()
+            profileFragment.arguments = bundle
+
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ProfileFragment())
+                .replace(R.id.fragment_container, profileFragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -195,7 +207,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             val adapter = AlbumAdapter(
                                 albumList,
                                 onItemClick = { album ->
-                                    MusicPlayerManager.play(album.songUrl)
+                                    MusicPlayerManager.play(album)
                                 }
                             )
                             recyclerView.adapter = adapter

@@ -8,12 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-data class SongItem(
-    val albumArtUrl: String,
-    val title: String,
-    val artist: String
-)
-
 class StoryAdapter(
     private val stories: List<StoryItem>,
     private val onItemClick: (StoryItem) -> Unit

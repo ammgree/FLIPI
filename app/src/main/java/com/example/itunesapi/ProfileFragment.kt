@@ -9,8 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.itunesapi.DiaryItem
-import com.example.itunesapi.Playlist
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -37,6 +35,8 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
 
         // 🔗 UI 연결
         backButton = view.findViewById(R.id.backButton)
@@ -126,9 +126,19 @@ class ProfileFragment : Fragment() {
         }
 
         // 🔙 뒤로가기: 홈
+        val username = arguments?.getString("username") //homefragment에서받아왔음
+        val mood = arguments?.getString("mood")
+
         backButton.setOnClickListener {
+            val bundle = Bundle().apply { //이때 다시 보낸다~
+                putString("username", username)
+                putString("mood", mood)
+            }
+            val homeFragment = HomeFragment()
+            homeFragment.arguments = bundle
+
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment())
+                .replace(R.id.fragment_container, homeFragment)
                 .commit()
         }
 

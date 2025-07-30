@@ -15,9 +15,16 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.io.Serializable
 
+data class ViewPlaylist(
+    val title: String,
+    val songs: List<Album>
+) : Serializable
+
 class ViewPlaylistFragment : Fragment() {
 
     private lateinit var adapter: AlbumAdapter
+    private lateinit var showPlaylistView: RecyclerView
+    private lateinit var playlist: Playlist
     private var origin: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,30 +40,64 @@ class ViewPlaylistFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val goBackbtn = view.findViewById<ImageButton>(R.id.goBackbtn)
         val PlaylistName = view.findViewById<TextView>(R.id.PlaylistName)
-        val showPlaylistView = view.findViewById<RecyclerView>(R.id.showPlaylistView)
-
+        showPlaylistView = view.findViewById(R.id.showPlaylistView)
+        showPlaylistView.layoutManager = LinearLayoutManager(requireContext())
 
         val playlist = arguments?.getSerializable("playlist") as? Playlist
         playlist?.let {
             PlaylistName.text = it.title;
         }
-        showPlaylistView.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = AlbumAdapter(albumList = playlist!!.songs, { album ->
             adapter.selectAlbum(album)
-            adapter.selectedAlbum?.songUrl?.let { MusicPlayerManager.play(it) }
-            val bundle = Bundle().apply {
-                putSerializable("playlist", playlist)
-                putSerializable("selectedAlbum", adapter.selectedAlbum)
+
+            val albumList = ArrayList(playlist.songs)
+            val currentIndex = albumList.indexOf(album)
+
+// Album 리스트를 SongItem 리스트로 변환
+            val songItemList = albumList.map { album ->
+                SongItem(
+                    url = album.songUrl,
+                    title = album.title,
+                    artist = album.artist,
+                    albumArtUrl = album.imageUrl
+                )
+            }.toCollection(ArrayList())
+
+            val result = Bundle().apply {
+                putString("musicTitle", album.title)
+                putString("musicUrl", album.songUrl)
+                putString("musicArtist", album.artist)
+                putString("albumArtUrl", album.imageUrl)
+                putSerializable("albumList", albumList)
+                putInt("currentIndex", currentIndex)
             }
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container,ViewSongFragment().apply {
-                    arguments = bundle
-                })
-                .addToBackStack(null)
-                .commit()
+
+            parentFragmentManager.setFragmentResult("songSelected", result)
+
+            if (origin == "FocusTimer") {
+                // 타이머에서 왔으면 타이머 화면으로 돌아가기 or 새로 띄우기
+                val popped = parentFragmentManager.popBackStackImmediate("FocusTimer", 0)
+                if (!popped) {
+                    val fragment = FocusTimerFragment.newInstance(
+                        album.title,
+                        album.songUrl,
+                        songItemList,
+                        currentIndex
+                    )
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack("FocusTimer")
+                        .commit()
+                }
+            } else {
+                // 타이머에서 온 게 아니면 현재 화면 내에서 노래 재생만 처리
+                Toast.makeText(requireContext(), "${album.title} 재생", Toast.LENGTH_SHORT).show()
+                // 음악 재생 관련 메서드 호출 가능 (예: playMusic(album))
+            }
         }, { album ->
             AlertDialog.Builder(requireContext())
                 .setTitle("노래 삭제")

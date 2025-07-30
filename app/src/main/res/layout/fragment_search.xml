@@ -16,10 +16,11 @@
         android:layout_height="wrap_content"
         android:text="Search"
         android:textColor="#FFFFFF"
-        android:textSize="28sp"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/searchEditText"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/searchEditText"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- 검색창 + 검색 버튼 -->
     <EditText
