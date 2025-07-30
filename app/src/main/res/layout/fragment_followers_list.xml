@@ -6,12 +6,42 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
+    <!-- 뒤로가기 버튼 -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_arrow_back_ios_24"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="뒤로가기 버튼"
+        app:tint="#FFFFFF"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="13dp" />
+
+    <!-- 상단 타이틀: 버튼 오른쪽에 위치 -->
+    <TextView
+        android:id="@+id/followTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="팔로워 목록"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
+        app:layout_constraintTop_toTopOf="@id/btnBack"
+        app:layout_constraintBottom_toBottomOf="@id/btnBack" />
+
+
+    <!-- RecyclerView는 타이틀 아래에 위치 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/followRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="8dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:padding="15dp"
+        app:layout_constraintTop_toBottomOf="@id/followTitleTextView"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

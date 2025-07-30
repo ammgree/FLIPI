@@ -54,7 +54,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val storyList = mutableListOf<StoryItem>()
 
-    private lateinit var storyAdapter: StoryAdapter
+
 
 
     private var weatherApiKey: String = ""
@@ -101,45 +101,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         weatherTextView = view.findViewById(R.id.rcmdMentWeather)
         getLastLocation()
 
-
-
-        // 1. 리사이클러뷰 설정: 스토리 목록 보여줌
-        storyRecyclerView = view.findViewById(R.id.storyRecyclerView)
-        storyRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-
-        storyAdapter = StoryAdapter(storyList) { storyItem ->
-            val detailFragment = StoryDetailFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelable("story", storyItem)
-                }
-            }
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, detailFragment)
-                .addToBackStack(null)
-                .commit()
-        }
-
-        storyRecyclerView.adapter = storyAdapter
-
-        db.collection("stories")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null || snapshot == null) return@addSnapshotListener
-
-                storyList.clear()
-                for (doc in snapshot.documents) {
-                    val item = doc.toObject(StoryItem::class.java)
-                    if (item != null) storyList.add(item)
-                }
-                storyAdapter.notifyDataSetChanged()
-            }
-
-        // 2. + 스토리 추가 버튼 클릭 시, StoryAddFragment 다이얼로그 띄움
-        val addStoryButton = view.findViewById<Button>(R.id.addStoryButton)
-        addStoryButton.setOnClickListener {
-            val dialog = StoryAddFragment()
-            dialog.show(parentFragmentManager, "AddStoryDialog")
-        }
 
         // 3. 파이어스토어에서 프로필 이미지 불러오기
         val profileImageView = view.findViewById<ImageView>(R.id.profileImageView)

@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:text="Search"
         android:textColor="#FFFFFF"
-        android:textSize="24sp"
+        android:textSize="30sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/searchEditText"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,13 +27,13 @@
         android:id="@+id/searchEditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:backgroundTint="#FFFFFF"
         android:hint="검색어 입력"
         android:textColor="@android:color/white"
-        android:backgroundTint="#FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/searchTitleText"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/searchButton"
-        app:layout_constraintHorizontal_weight="1"/>
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchTitleText" />
 
     <ImageButton
         android:id="@+id/searchButton"
