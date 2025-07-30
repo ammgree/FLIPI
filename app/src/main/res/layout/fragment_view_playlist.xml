@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    tools:context=".ViewPlaylistFragment"
-    android:padding="16dp">
+    android:padding="16dp"
+    tools:context=".ViewPlaylistFragment">
 
     <ImageButton
         android:id="@+id/goBackbtn"
@@ -28,14 +28,16 @@
         app:layout_constraintStart_toEndOf="@+id/goBackbtn"
         app:layout_constraintTop_toTopOf="parent" />
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/showPlaylistView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@+id/PlaylistName"
-        tools:layout_editor_absoluteX="16dp" />
-
-
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        tools:listitem="@layout/item_song" />
 </androidx.constraintlayout.widget.ConstraintLayout>

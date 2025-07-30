@@ -55,6 +55,7 @@ class StoryDetailFragment : Fragment() {
         val buttonHappy = view.findViewById<ImageButton>(R.id.buttonHappy)
         val buttonNeutral = view.findViewById<ImageButton>(R.id.buttonNeutral)
         val buttonSad = view.findViewById<ImageButton>(R.id.buttonSad)
+        val buttonBack = view.findViewById<ImageButton>(R.id.goBackbtn)
 
         buttonHappy.setOnClickListener {
             Toast.makeText(requireContext(), "좋아요!", Toast.LENGTH_SHORT).show()
@@ -68,6 +69,10 @@ class StoryDetailFragment : Fragment() {
 
         buttonSad.setOnClickListener {
             Toast.makeText(requireContext(), "별로!", Toast.LENGTH_SHORT).show()
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+
+        buttonBack.setOnClickListener{
             requireActivity().supportFragmentManager.popBackStack()
         }
     }

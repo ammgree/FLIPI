@@ -58,7 +58,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         //$mood $usernme 님을 위한 노래 textveiw & recyclerView
         val mood = arguments?.getString("mood") ?: ""
         val username = arguments?.getString("username") ?: ""
@@ -105,7 +104,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     }
                 }
         }.start()
-
 
 
 

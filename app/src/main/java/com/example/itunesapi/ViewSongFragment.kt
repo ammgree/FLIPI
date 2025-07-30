@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -17,6 +18,7 @@ class ViewSongFragment : Fragment() {
     private lateinit var albumImageView: ImageView
     private lateinit var itplaylist: Playlist
     private lateinit var itsonglist : List<Album>
+    private lateinit var goBackbtn : ImageButton
     private var currentIndex = 0
 
     override fun onCreateView(
@@ -27,10 +29,10 @@ class ViewSongFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val Backbtn = view.findViewById<ImageButton>(R.id.Backbtn)
         songTitleTextView = view.findViewById(R.id.songTitleTextView)
         artistTextView = view.findViewById(R.id.artistTextView)
         albumImageView = view.findViewById(R.id.albumImageView)
+        goBackbtn = view.findViewById(R.id.goBackbtn)
 
 
         val playlist = arguments?.getSerializable("playlist") as? Playlist
@@ -45,7 +47,8 @@ class ViewSongFragment : Fragment() {
 
             updateSongUI(itsonglist[currentIndex])
         }
-        Backbtn.setOnClickListener{
+
+        goBackbtn.setOnClickListener{
             requireActivity().supportFragmentManager.popBackStack()
         }
     }
