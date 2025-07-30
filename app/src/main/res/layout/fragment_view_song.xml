@@ -12,6 +12,7 @@
 
     <ImageButton
         android:id="@+id/goBackbtn"
+        android:contentDescription="전으로 이동"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -44,46 +45,6 @@
         android:layout_marginTop="8dp"
         android:textColor="@color/white"
         android:textSize="24sp" />
-
-    <LinearLayout
-        android:id="@+id/reactionButtons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="16dp">
-
-        <ImageButton
-            android:id="@+id/buttonHappy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/very_satisfied"
-            app:tint="@color/white"
-            android:contentDescription="좋아요"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="16dp" />
-
-        <ImageButton
-            android:id="@+id/buttonNeutral"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/neutral"
-            android:contentDescription="그냥 그래요"
-            app:tint="@color/white"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="16dp" />
-
-        <ImageButton
-            android:id="@+id/buttonSad"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/dissatisfied"
-            android:contentDescription="별로"
-            app:tint="@color/white"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="16dp" />
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

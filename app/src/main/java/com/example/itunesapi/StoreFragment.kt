@@ -8,8 +8,6 @@ import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.replace
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.itunesapi.model.YoutubeVideoInfo
@@ -18,7 +16,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
 import org.json.JSONObject
 import java.net.URLEncoder
 
@@ -301,23 +298,6 @@ class StoreFragment : Fragment() {
                 null
             }
         }
-    }
-
-
-
-    // 유튜브 영상 리스트를 iTunes 앨범 리스트로 매칭
-    private suspend fun matchYoutubeToItunes(youtubeList: List<YoutubeVideoInfo>): List<Album> {
-        val albumList = mutableListOf<Album>()
-        for (video in youtubeList) {
-            val album = searchItunesSong(video.title)
-            if (album != null) {
-                albumList.add(album)
-                Log.d("itunes_match", "🎶 매칭 성공: ${album.title} - ${album.artist}")
-            } else {
-                Log.w("itunes_match", "❌ 매칭 실패: ${video.title} - ${video.channelTitle}")
-            }
-        }
-        return albumList
     }
 
     // 사용자에게 플레이리스트 이름을 입력받는 다이얼로그

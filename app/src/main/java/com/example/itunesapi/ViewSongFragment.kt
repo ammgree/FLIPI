@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -73,10 +72,21 @@ class ViewSongFragment : Fragment() {
                 playButton.visibility = View.GONE
                 pauseButton.visibility = View.VISIBLE
             }
+
             pauseButton.setOnClickListener {
                 MusicPlayerManager.pause()
                 playButton.visibility = View.VISIBLE
                 pauseButton.visibility = View.GONE
+            }
+
+            MusicPlayerManager.setOnCompletionListener {
+                requireActivity().runOnUiThread {
+                    if (currentIndex == itsonglist.size-1)
+                        currentIndex = 0
+                    else
+                        currentIndex++
+                    updateSongUI(itsonglist[currentIndex])
+                }
             }
         }
 

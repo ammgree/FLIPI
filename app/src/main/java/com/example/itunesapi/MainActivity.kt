@@ -2,7 +2,6 @@ package com.example.itunesapi
 
 import android.os.Bundle
 import android.widget.ImageButton
-
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat

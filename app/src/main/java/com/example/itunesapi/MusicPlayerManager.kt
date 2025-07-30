@@ -1,18 +1,31 @@
 
 package com.example.itunesapi
 import android.media.MediaPlayer
+import android.os.Handler
+import android.os.Looper
 
 object MusicPlayerManager {
     private var mediaPlayer: MediaPlayer? = null
+    private var onCompletionListener: (() -> Unit)? = null
 
     fun play(url: String) {
-        stop()
+        mediaPlayer?.release()
         mediaPlayer = MediaPlayer().apply {
             setDataSource(url)
             prepareAsync()
             setOnPreparedListener { it.start() }
-            setOnCompletionListener { stop() }
+            setOnCompletionListener {
+                releasePlayer()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    onCompletionListener?.invoke()
+                }, 100 )
+            }
         }
+    }
+
+    private fun releasePlayer() {
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
     fun stop() {
@@ -31,7 +44,7 @@ object MusicPlayerManager {
         mediaPlayer?.start()
     }
 
-    fun isPlaying(): Boolean {
-        return mediaPlayer?.isPlaying == true
+    fun setOnCompletionListener(listener: () -> Unit) {
+        onCompletionListener = listener
     }
 }

@@ -6,16 +6,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import android.view.*
-import android.widget.*
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
@@ -31,7 +27,6 @@ class SearchFragment : Fragment() {
     private lateinit var adapter: AlbumAdapter
     // 검색해서 나올 노래 리스트
     private val albumList = mutableListOf<Album>()
-    private var mediaPlayer: MediaPlayer? = null
     lateinit var addButton: ImageButton
     private var fromDiaryAdd: Boolean = false
     private var searchAttribute = ""
@@ -112,7 +107,6 @@ class SearchFragment : Fragment() {
                     val term = URLEncoder.encode(rawInput, "UTF-8")
                     val baseUrl =
                         "https://itunes.apple.com/search?media=music&entity=song&country=kr"
-                    val isEnglish = rawInput.matches(Regex("^[a-zA-Z0-9\\s]+$"))
 
 
                     val urlSong = if (searchAttribute.isNotEmpty()) {

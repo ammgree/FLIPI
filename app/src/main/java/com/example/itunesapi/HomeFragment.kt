@@ -36,7 +36,6 @@ import com.google.android.gms.location.LocationServices
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
-import com.example.itunesapi.BuildConfig
 import android.location.Geocoder
 import java.util.Locale
 
