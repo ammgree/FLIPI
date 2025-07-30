@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.itunesapi.databinding.FragmentFocusTimerBinding
 import java.text.SimpleDateFormat
@@ -154,13 +155,12 @@ class FocusTimerFragment : Fragment() {
         isRunning = false
         timerTask?.cancel()
         timerTask = null
-
         val totalSeconds = (elapsedTime / 1000).toInt()
-        saveStudyTimeToFirebase(subjectName, totalSeconds)
+        val viewModel = ViewModelProvider(requireActivity())[TimerViewModel::class.java]
+        viewModel.updateTime(subjectName, totalSeconds)
 
         Toast.makeText(requireContext(), "스톱워치 종료: ${binding.tvTimer.text}", Toast.LENGTH_SHORT).show()
     }
-
     // 현재 재생중인 곡 UI 업데이트 및 음악 재생
     private fun updateAndPlayCurrentSong() {
         if (playlist.isEmpty()) {
