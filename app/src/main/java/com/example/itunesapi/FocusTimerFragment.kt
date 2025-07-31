@@ -208,34 +208,22 @@ class FocusTimerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         parentFragmentManager.setFragmentResultListener("songSelected", viewLifecycleOwner) { _, bundle ->
-            val musicList = bundle.getParcelableArrayList<Album>("playlist")
-            val selectedIndex = bundle.getInt("selectedIndex", 0)
 
-            if (musicList != null) {
-                playlist = musicList
-                currentIndex = selectedIndex
-                updateAndPlayCurrentSong()
-            } else {
-                // 예전 방식 호환용 (단일 곡만 받았을 경우)
-                val musicUrl = bundle.getString("musicUrl") ?: ""
-                val musicTitle = bundle.getString("musicTitle") ?: ""
-                val musicArtist = bundle.getString("musicArtist") ?: ""
-                val albumArtUrl = bundle.getString("albumArtUrl") ?: ""
+            val getSong = bundle.getParcelable<Album>("album")
+            val getPlaylist = bundle.getSerializable("playlist") as List<Album>
+            this.playlist = getPlaylist
 
-                this.musicUrl = musicUrl
-                this.subjectName = musicTitle
+            binding.currentMusicBox.visibility = View.VISIBLE
+            binding.tvCurrentMusicTitle.text = "재생 중: ${getSong?.title} - ${getSong?.artist}"
 
-                binding.currentMusicBox.visibility = View.VISIBLE
-                binding.tvCurrentMusicTitle.text = "재생 중: $musicTitle - $musicArtist"
+            Glide.with(this)
+                .load(getSong?.imageUrl)
+                .placeholder(R.drawable.music_note)
+                .into(binding.albumArt)
 
-                Glide.with(this)
-                    .load(albumArtUrl)
-                    .placeholder(R.drawable.music_note)
-                    .into(binding.albumArt)
+            stopMusic()
+            playMusic()
 
-                stopMusic()
-                playMusic()
-            }
         }
 
         setupViews()

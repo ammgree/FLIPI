@@ -32,7 +32,6 @@ class StoreFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         origin = arguments?.getString("origin")
-        Log.d("StoreFragment", "origin = $origin")
     }
 
     override fun onCreateView(
@@ -50,6 +49,19 @@ class StoreFragment : Fragment() {
 
         adapter = PlaylistAdapter(mainActivity.playLists,
             onItemClick = { selectedPlaylist ->
+                Log.d("origin","origin: ${origin}")
+                if(origin == "FocusTimer"){
+                    val playlistFragment = ViewPlaylistFragment().apply {
+                        arguments = Bundle().apply {
+                            putString("origin", "FocusTimer")
+                            putSerializable("playlist", selectedPlaylist)
+                        }
+                    }
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, playlistFragment)
+                        .addToBackStack(null)
+                        .commit()
+                }
                 val bundle = Bundle().apply {
                     putSerializable("playlist", selectedPlaylist)
                 }

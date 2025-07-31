@@ -2,6 +2,7 @@ package com.example.itunesapi
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.replace
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
@@ -18,11 +20,11 @@ import java.io.Serializable
 class ViewPlaylistFragment : Fragment() {
 
     private lateinit var adapter: AlbumAdapter
-    private var origin: String? = null
-
+    private lateinit var origin: String
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        origin = arguments?.getString("origin")
+        origin = arguments?.getString("origin").toString()
+        Log.d("origin", "origin: $origin")
     }
 
     override fun onCreateView(
@@ -50,16 +52,28 @@ class ViewPlaylistFragment : Fragment() {
                 MusicPlayerManager.play(album)
             }
 
-            val bundle = Bundle().apply {
-                putSerializable("playlist", playlist)
-                putSerializable("selectedAlbum", adapter.selectedAlbum)
+            if (origin == "FocusTimer") {
+                val resultBundle = Bundle().apply {
+                    putParcelable("album", album)
+                    putSerializable("playlist", playlist)
+                }
+                parentFragmentManager.setFragmentResult("songSelected", resultBundle)
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container,FocusTimerFragment())
+                    .addToBackStack(null)
+                    .commit()
+            } else {
+                val bundle = Bundle().apply {
+                    putSerializable("playlist", playlist)
+                    putSerializable("selectedAlbum", adapter.selectedAlbum)
+                }
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container,ViewSongFragment().apply {
+                        arguments = bundle
+                    })
+                    .addToBackStack(null)
+                    .commit()
             }
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container,ViewSongFragment().apply {
-                    arguments = bundle
-                })
-                .addToBackStack(null)
-                .commit()
         }, { album ->
             AlertDialog.Builder(requireContext())
                 .setTitle("노래 삭제")

@@ -24,7 +24,7 @@ class ViewSongFragment : Fragment() {
     private lateinit var playButton: ImageButton
     private lateinit var pauseButton: ImageButton
 
-    // ✅ 리스너 변수화 (중복 등록/제거 방지)
+
     private val playPauseListener: (Boolean) -> Unit = { isPlaying ->
         playButton.visibility = if (isPlaying) GONE else VISIBLE
         pauseButton.visibility = if (isPlaying) VISIBLE else GONE
@@ -50,7 +50,6 @@ class ViewSongFragment : Fragment() {
         val playlist = arguments?.getSerializable("playlist") as? Playlist
         val album = arguments?.getSerializable("selectedAlbum") as? Album
 
-        // ✅ 리스너 등록
         MusicPlayerManager.addOnPlayPauseChangeListener(playPauseListener)
 
         playlist?.let {
