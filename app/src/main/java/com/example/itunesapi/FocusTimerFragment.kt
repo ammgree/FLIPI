@@ -98,7 +98,8 @@ class FocusTimerFragment : Fragment() {
         binding.btnMusic.setOnClickListener {
             val storeFragment = StoreFragment()
             storeFragment.arguments = Bundle().apply {
-                putString("origin", "FocusTimer")  // 출처 정보 전달
+                putString("origin", "FocusTimer")
+                putString("subject", subjectName)
             }
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, storeFragment)
@@ -174,9 +175,7 @@ class FocusTimerFragment : Fragment() {
     }
 
     private fun stopMusic() {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = null
+        MusicPlayerManager.stop()
     }
 
     private fun stopTimer() {
@@ -207,10 +206,15 @@ class FocusTimerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        parentFragmentManager.setFragmentResultListener("songSelected", viewLifecycleOwner) { _, bundle ->
+        parentFragmentManager.setFragmentResultListener(
+            "songSelected",
+            viewLifecycleOwner
+        ) { _, bundle ->
 
             val getSong = bundle.getParcelable<Album>("album")
-            val getPlaylist = bundle.getSerializable("playlist") as List<Album>
+//val getPlaylist = bundle.getSerializable("playlist") as List<Album>
+            val playlist = bundle.getSerializable("playlist") as Playlist
+            val getPlaylist: List<Album> = playlist.songs
             this.playlist = getPlaylist
 
             binding.currentMusicBox.visibility = View.VISIBLE
@@ -223,10 +227,7 @@ class FocusTimerFragment : Fragment() {
 
             stopMusic()
             playMusic()
-
         }
-
         setupViews()
     }
-
 }

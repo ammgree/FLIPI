@@ -55,22 +55,24 @@ class StoreFragment : Fragment() {
                         arguments = Bundle().apply {
                             putString("origin", "FocusTimer")
                             putSerializable("playlist", selectedPlaylist)
+                            putString("subject", arguments?.getString("subject"))
                         }
                     }
                     parentFragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, playlistFragment)
                         .addToBackStack(null)
                         .commit()
+                } else {
+                    val bundle = Bundle().apply {
+                        putSerializable("playlist", selectedPlaylist)
+                    }
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, ViewPlaylistFragment().apply {
+                            arguments = bundle
+                        })
+                        .addToBackStack(null)
+                        .commit()
                 }
-                val bundle = Bundle().apply {
-                    putSerializable("playlist", selectedPlaylist)
-                }
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, ViewPlaylistFragment().apply {
-                        arguments = bundle
-                    })
-                    .addToBackStack(null)
-                    .commit()
             },
             onItemLongClick = { playlist ->
                 AlertDialog.Builder(requireContext())

@@ -54,13 +54,15 @@ class ViewPlaylistFragment : Fragment() {
             }
 
             if (origin == "FocusTimer") {
+                val subject = arguments?.getString("subject") ?: "기본"
                 val resultBundle = Bundle().apply {
                     putParcelable("album", album)
                     putSerializable("playlist", playlist)
                 }
                 parentFragmentManager.setFragmentResult("songSelected", resultBundle)
                 parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container,FocusTimerFragment())
+                    .replace(R.id.fragment_container,
+                        FocusTimerFragment.newInstance(subject, album.songUrl))
                     .addToBackStack(null)
                     .commit()
             } else {
