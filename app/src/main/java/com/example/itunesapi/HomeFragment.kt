@@ -274,11 +274,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     }
                 }
             } catch (e: Exception) {
-                requireActivity().runOnUiThread {
+                activity?.runOnUiThread {
                     weatherTextView.text = "네트워크 오류: ${e.message}"
                 }
             }
-        }.start()
+
+ }.start()
     }
 
     // 권한 요청 결과 처리
