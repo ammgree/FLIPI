@@ -14,6 +14,18 @@
         android:layout_height="match_parent"
         android:background="@android:color/black">
 
+        <!-- 상단 타이틀 -->
+        <TextView
+            android:id="@+id/diaryTitleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Timer"
+            android:textAlignment="viewStart"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="30sp"
+            android:layout_marginBottom="16dp" />
+
         <!-- 1. 막대 그래프 -->
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/barChart"

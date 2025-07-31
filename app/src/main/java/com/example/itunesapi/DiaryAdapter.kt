@@ -13,7 +13,7 @@ class DiaryAdapter(
     private val diaryList: List<DiaryItem>,
     private val onItemClick: (DiaryItem) -> Unit,
     private val onItemLongClick: (DiaryItem) -> Unit,
-    private val isProfile: Boolean = false  // ← 추가
+    private val isProfile: Boolean = false
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {

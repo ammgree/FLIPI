@@ -14,6 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileFragment : Fragment() {
 
+    // UI 컴포넌트 선언
     private lateinit var backButton: ImageButton
     private lateinit var searchButton: ImageButton
     private lateinit var profileImage: ImageView
@@ -26,17 +27,19 @@ class ProfileFragment : Fragment() {
     private lateinit var followersText: TextView
     private lateinit var postCountText: TextView
 
+    // Firebase 참조
     private val db = FirebaseFirestore.getInstance()
     private val uid: String? get() = arguments?.getString("userId") ?: FirebaseAuth.getInstance().currentUser?.uid
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        // 프래그먼트 레이아웃 inflate
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // UI 연결
+        // 레이아웃에서 뷰 바인딩
         backButton = view.findViewById(R.id.backButton)
         searchButton = view.findViewById(R.id.searchButton)
         profileImage = view.findViewById(R.id.profileImage)
@@ -49,16 +52,20 @@ class ProfileFragment : Fragment() {
         followingText = view.findViewById(R.id.followingText)
         postCountText = view.findViewById(R.id.postCountText)
 
+        // RecyclerView 레이아웃 설정
         diaryRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         archiveRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        // 사용자 정보, 일기, 팔로우 데이터 불러오기
         loadUserInfo()
         loadDiaries()
         loadFollowCounts()
 
+        // 이전 화면에서 전달받은 사용자 정보
         val username = arguments?.getString("username")
         val mood = arguments?.getString("mood")
 
+        // 뒤로가기 버튼 → 홈으로 이동하며 번들 전달
         backButton.setOnClickListener {
             val bundle = Bundle().apply {
                 putString("username", username)
@@ -69,6 +76,7 @@ class ProfileFragment : Fragment() {
                 .commit()
         }
 
+        // 검색 버튼 → 사용자 검색 화면으로 이동
         searchButton.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, UserSearchFragment())
@@ -76,6 +84,7 @@ class ProfileFragment : Fragment() {
                 .commit()
         }
 
+        // 팔로워 텍스트 클릭 시 팔로워 목록 프래그먼트로 이동
         followersText.setOnClickListener {
             uid?.let {
                 parentFragmentManager.beginTransaction()
@@ -87,6 +96,7 @@ class ProfileFragment : Fragment() {
             }
         }
 
+        // 팔로잉 텍스트 클릭 시 팔로잉 목록 프래그먼트로 이동
         followingText.setOnClickListener {
             uid?.let {
                 parentFragmentManager.beginTransaction()
@@ -98,7 +108,7 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        // 탭 전환
+        // 탭 버튼 클릭에 따른 화면 전환
         diaryTabButton.setOnClickListener {
             diaryRecyclerView.visibility = View.VISIBLE
             archiveRecyclerView.visibility = View.GONE
@@ -107,18 +117,20 @@ class ProfileFragment : Fragment() {
         archiveTabButton.setOnClickListener {
             diaryRecyclerView.visibility = View.GONE
             archiveRecyclerView.visibility = View.VISIBLE
-            loadPlaylists()
+            loadPlaylists() // 보관함 로드
         }
 
-        // 선택된 탭 유지
+        // selectedTab 전달 여부에 따라 탭 상태 결정
         when (arguments?.getString("selectedTab")) {
             "archive" -> archiveTabButton.performClick()
             else -> diaryTabButton.performClick()
         }
 
+        // 하단 내비게이션 바 숨기기
         activity?.findViewById<View>(R.id.navigationBar)?.visibility = View.GONE
     }
 
+    // 사용자 프로필 정보 (닉네임, 이미지) 불러오기
     private fun loadUserInfo() {
         uid?.let {
             db.collection("users").document(it).get()
@@ -132,9 +144,11 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    // 일기 리스트 로드 및 RecyclerView에 표시
     private fun loadDiaries() {
         val diaryList = mutableListOf<DiaryItem>()
-        val adapter = DiaryAdapter(diaryList,
+        val adapter = DiaryAdapter(
+            diaryList,
             onItemClick = { item ->
                 parentFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, DiaryDetailFragment(item))
@@ -144,7 +158,7 @@ class ProfileFragment : Fragment() {
             onItemLongClick = { item ->
                 Toast.makeText(requireContext(), "길게 누름: ${item.title}", Toast.LENGTH_SHORT).show()
             },
-            isProfile = true
+            isProfile = true // 프로필 화면에서 사용하는 플래그
         )
         diaryRecyclerView.adapter = adapter
 
@@ -165,6 +179,7 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    // 팔로워/팔로잉 수 로드
     private fun loadFollowCounts() {
         uid?.let {
             db.collection("users").document(it).collection("followers")
@@ -177,6 +192,7 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    // 보관함(플레이리스트) 로드
     private fun loadPlaylists() {
         val archiveList = mutableListOf<Playlist>()
         val adapter = PlaylistAdapter(

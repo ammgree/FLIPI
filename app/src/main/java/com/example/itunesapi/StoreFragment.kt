@@ -327,9 +327,9 @@ class StoreFragment : Fragment() {
             val album = searchItunesSong(video.title)
             if (album != null) {
                 albumList.add(album)
-                Log.d("itunes_match", "🎶 매칭 성공: ${album.title} - ${album.artist}")
+                Log.d("itunes_match", " 매칭 성공: ${album.title} - ${album.artist}")
             } else {
-                Log.w("itunes_match", "❌ 매칭 실패: ${video.title} - ${video.channelTitle}")
+                Log.w("itunes_match", " 매칭 실패: ${video.title} - ${video.channelTitle}")
             }
         }
         return albumList
@@ -433,24 +433,34 @@ class StoreFragment : Fragment() {
 
 
 
+    // View가 생성된 직후 호출되며, 초기화 작업을 수행하는 함수
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // RecyclerView에 LinearLayoutManager 설정 (세로 방향 리스트)
         storeRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        // 현재 액티비티를 MainActivity로 캐스팅
         val mainActivity = requireActivity() as MainActivity
+
+        // 현재 로그인된 사용자 UID 가져오기 (없으면 함수 종료)
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
+        // MainActivity 내의 플레이리스트 리스트 초기화
         mainActivity.playLists.clear()
 
+        // Firestore에서 현재 사용자(uid)의 플레이리스트 컬렉션 가져오기
         FirebaseFirestore.getInstance()
             .collection("users").document(uid)
             .collection("playlists")
             .get()
             .addOnSuccessListener { documents ->
                 for (doc in documents) {
+                    // 각 문서에서 제목과 사진 URL 가져오기
                     val title = doc.getString("title") ?: ""
                     val picture = doc.getString("picture") ?: ""
+
+                    // "songs" 필드에서 노래 목록을 가져와 Album 리스트로 변환
                     val songsData = doc.get("songs") as? List<Map<String, Any>> ?: emptyList()
 
                     val songs = songsData.map {
@@ -463,12 +473,17 @@ class StoreFragment : Fragment() {
                         )
                     }.toMutableList()
 
+                    // Playlist 객체를 만들어 MainActivity의 리스트에 추가
                     mainActivity.playLists.add(Playlist(title, picture, songs))
                 }
+
+                // RecyclerView의 어댑터에 변경 사항 알림 → 화면 갱신
                 adapter.notifyDataSetChanged()
             }
     }
 
+
+    // 특정 사용자의 플레이리스트 중에서 주어진 제목을 가진 플레이리스트를 삭제하는 함수
     fun deletePlaylist(userId: String, playlistTitle: String, onComplete: () -> Unit) {
         val db = FirebaseFirestore.getInstance()
 

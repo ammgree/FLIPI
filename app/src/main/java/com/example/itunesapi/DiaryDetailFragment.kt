@@ -25,7 +25,7 @@ class DiaryDetailFragment(private val diaryItem: DiaryItem) : Fragment() {
         val visibilityText = view.findViewById<TextView>(R.id.textVisibility)
         val backButton = view.findViewById<ImageButton>(R.id.btnBack)
 
-        // 👇 추가된 부분: 음악 텍스트 관련 뷰 찾기
+        // 음악 텍스트 관련 뷰 찾기
         val musicTitleText = view.findViewById<TextView>(R.id.textMusicTitle)
         val musicArtistText = view.findViewById<TextView>(R.id.textMusicArtist)
         val musicInfoLayout = view.findViewById<View>(R.id.layoutMusicInfo)  // LinearLayout 전체
@@ -50,7 +50,7 @@ class DiaryDetailFragment(private val diaryItem: DiaryItem) : Fragment() {
         }
 
 
-        // ✅ 음악 재생
+        // 음악 재생
         diaryItem.musicUrl?.let { url ->
             if (url.isNotEmpty()) {
                 stopCurrentPlayback()

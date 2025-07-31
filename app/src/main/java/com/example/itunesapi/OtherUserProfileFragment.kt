@@ -12,8 +12,10 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
+// 다른 사용자의 프로필 화면을 보여주는 Fragment
 class OtherUserProfileFragment : Fragment() {
 
+    // UI 요소 선언
     private lateinit var profileImage: ImageView
     private lateinit var usernameText: TextView
     private lateinit var followButton: Button
@@ -38,6 +40,7 @@ class OtherUserProfileFragment : Fragment() {
 
     private val db = FirebaseFirestore.getInstance()
 
+    // username을 넘겨받아 Fragment 생성
     companion object {
         fun newInstance(username: String): OtherUserProfileFragment {
             val fragment = OtherUserProfileFragment()
@@ -75,7 +78,7 @@ class OtherUserProfileFragment : Fragment() {
         diaryRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         archiveRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        // 어댑터 설정
+        // 일기 어댑터 설정 (다이어리 클릭 시 상세화면으로 이동)
         diaryAdapter = DiaryAdapter(diaryList, onItemClick = { diaryItem ->
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, DiaryDetailFragment(diaryItem))
@@ -83,6 +86,7 @@ class OtherUserProfileFragment : Fragment() {
                 .commit()
         }, onItemLongClick = {}, isProfile = true)
 
+        // 보관함 어댑터 설정 (플리 클릭 시 ViewPlaylistFragment로 이동)
         playlistAdapter = PlaylistAdapter(playlistList,
             onItemClick = { playlist ->
                 val bundle = Bundle().apply {
@@ -102,7 +106,7 @@ class OtherUserProfileFragment : Fragment() {
         diaryRecyclerView.adapter = diaryAdapter
         archiveRecyclerView.adapter = playlistAdapter
 
-        // 버튼 이벤트
+        // 버튼 이벤트 처리
         backButton.setOnClickListener { parentFragmentManager.popBackStack() }
         followButton.setOnClickListener { toggleFollow() }
         followersText.setOnClickListener { showUserList("followers") }
@@ -119,13 +123,13 @@ class OtherUserProfileFragment : Fragment() {
             loadPlaylists()
         }
 
-        // 데이터 로드
+        // 초기 데이터 로드
         loadUserInfo()
         loadDiaryList()
         checkFollowState()
         fetchViewedUserFollowCounts()
 
-        // 탭 자동 선택
+        // 선택된 탭 유지
         val selectedTab = arguments?.getString("selectedTab")
         if (selectedTab == "archive") {
             archiveTabButton.performClick()
@@ -134,6 +138,7 @@ class OtherUserProfileFragment : Fragment() {
         }
     }
 
+    // 사용자 정보 가져오기
     private fun loadUserInfo() {
         db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
@@ -146,6 +151,7 @@ class OtherUserProfileFragment : Fragment() {
             }
     }
 
+    // 공개 일기 불러오기
     private fun loadDiaryList() {
         db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
@@ -166,6 +172,7 @@ class OtherUserProfileFragment : Fragment() {
             }
     }
 
+    // 보관함 (플레이리스트) 불러오기
     private fun loadPlaylists() {
         db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
@@ -182,6 +189,7 @@ class OtherUserProfileFragment : Fragment() {
             }
     }
 
+    // 팔로우 상태 확인
     private fun checkFollowState() {
         db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
@@ -197,6 +205,7 @@ class OtherUserProfileFragment : Fragment() {
             }
     }
 
+    // 팔로우/언팔로우 전환
     private fun toggleFollow() {
         db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
@@ -208,6 +217,7 @@ class OtherUserProfileFragment : Fragment() {
                         .collection("followers").document(currentUserId)
 
                     if (followButton.text == "팔로우") {
+                        // 현재 사용자 정보 저장
                         db.collection("users").document(currentUserId).get()
                             .addOnSuccessListener { currentDoc ->
                                 val currentUsername = currentDoc.getString("username") ?: ""
@@ -247,6 +257,7 @@ class OtherUserProfileFragment : Fragment() {
             }
     }
 
+    // 팔로워, 팔로잉 수 가져오기
     private fun fetchViewedUserFollowCounts() {
         db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
@@ -265,6 +276,7 @@ class OtherUserProfileFragment : Fragment() {
             }
     }
 
+    // 팔로워 / 팔로잉 목록 화면으로 이동
     private fun showUserList(type: String) {
         db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
