@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         // 홈 버튼
         val navHome = findViewById<ImageButton>(R.id.nav_home)
 
-        navHome.setOnClickListener {
+        navHome.setOnClickListener { //mood서 받아온 username 함께 넘기기
             val mood = intent.getStringExtra("mood")
             val username = intent.getStringExtra("username")
 

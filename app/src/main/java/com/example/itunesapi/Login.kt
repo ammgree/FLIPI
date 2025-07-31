@@ -84,50 +84,42 @@ class Login : AppCompatActivity() {
                 "title" to "발자국",
                 "artist" to "나상현씨밴드",
                 "mood" to "차분한",
-                "weather" to "흐림",
-                "likeCount" to 0
+                "weather" to "흐림"
             ),mapOf(
                 "title" to "stranger's theme",
                 "artist" to "빈지노",
                 "mood" to "차분한",
-                "weather" to "맑음",
-                "likeCount" to 0
+                "weather" to "맑음"
             ),mapOf(
                 "title" to "아까워",
                 "artist" to "재지팩트",
                 "mood" to "차분한",
-                "weather" to "흐림",
-                "likeCount" to 0
+                "weather" to "흐림"
             ),mapOf(
                 "title" to "young knight",
                 "artist" to "재지팩트",
                 "mood" to "기분이 그저그런",
-                "weather" to "맑음",
-                "likeCount" to 0
+                "weather" to "맑음"
             ),mapOf(
                 "title" to "25",
                 "artist" to "나상현씨밴드",
                 "mood" to "기분이 그저그런",
-                "weather" to "흐림",
-                "likeCount" to 0
+                "weather" to "흐림"
             ),mapOf(
                 "title" to "always awake",
                 "artist" to "빈지노",
                 "mood" to "기분이 좋은",
-                "weather" to "맑음",
-                "likeCount" to 0
+                "weather" to "맑음"
             ),mapOf(
                 "title" to "love love love",
                 "artist" to "나상현씨밴드",
                 "mood" to "기분이 좋은",
-                "weather" to "맑음",
-                "likeCount" to 0
+                "weather" to "맑음"
             ),mapOf(
                 "title" to "train",
                 "artist" to "빈지노",
                 "mood" to "행복한",
-                "weather" to "맑음",
-                "likeCount" to 0
+                "weather" to "맑음"
             )
         )
 

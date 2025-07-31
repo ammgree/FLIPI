@@ -68,7 +68,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val mood = arguments?.getString("mood") ?: "" //이걸 먼저 받을게욤
+        val mood = arguments?.getString("mood") ?: ""
         val username = arguments?.getString("username") ?: ""
 
         KeyManager.init(requireContext())
@@ -76,15 +76,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
 
         //MODD 기분기반노래추천 = $mood $usernme 님을 위한 노래 textveiw & recyclerView
-
-
         val moodRecyclerView = view.findViewById<RecyclerView>(R.id.rcmdSongRecyclerView)
         moodRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val rcmdMent = view.findViewById<TextView>(R.id.rcmdMent)
         rcmdMent.text = "$mood $username 님을 위한 \n오늘의 노래추천 🎵"
-
         RecommendSong(mood, moodRecyclerView, "mood")
+
 
         //WEATHER 사용자 위치기반 날씨에 따른 노래추천
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext()) //위치클라이언트 초기화
@@ -138,6 +136,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         activity?.findViewById<View>(R.id.navigationBar)?.visibility = View.VISIBLE
     }
 
+    //파이어베이스 songs에서 같은 필드 논래 중 5개 랜덤 노래 뽑아오는 함수
     fun RecommendSong(value : String, recyclerView: RecyclerView, field : String){
         Log.d("RecommendSong", "value: '$value', field: '$field'")
         Thread {
@@ -178,6 +177,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }.start()
     }
 
+    //아이튠즈서 노래 받아오기
     fun makeMap(urls:String) : Map<String, Album>{
         //URL 객체로 만들기
         val url = URL(urls)
@@ -213,6 +213,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         return madeMap
     }
 
+    //사용자 위도 경도 받아오는 함수
     private fun getLastLocation() {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
@@ -229,20 +230,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
             if (location == null) {
-                weatherTextView.text = "위치 정보를 받아올 수 없습니다 😱"
+                weatherTextView.text = "위치 정보를 받아올 수 없습니다"
                 return@addOnSuccessListener
             }
             fetchWeather(location.latitude, location.longitude)
         }
     }
 
+    //지역, 날씨 합쳐 출력하는 함수
     private fun fetchWeather(lat: Double, lon: Double) {
  Thread {
             try {
                 val client = OkHttpClient()
                 val url = "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$weatherApiKey&lang=kr&units=metric"
-
-
 
                 val request = Request.Builder().url(url).build()
                 val response = client.newCall(request).execute()
@@ -295,6 +295,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
+    //지역 이름 가져오는 함수
     private fun getLocationName(lat: Double, lon: Double): String {
         return try {
             val geocoder = Geocoder(requireContext(), Locale.KOREA)

@@ -53,7 +53,7 @@ class Mood : AppCompatActivity() {
         }
     }
 
-    private fun openHome(mood : String, username : String){
+    private fun openHome(mood : String, username : String){ //mood, username 같이 넘김
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         if (uid != null) {
             val db = FirebaseFirestore.getInstance()
