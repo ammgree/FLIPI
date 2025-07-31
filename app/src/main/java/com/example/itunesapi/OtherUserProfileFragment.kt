@@ -35,6 +35,7 @@ class OtherUserProfileFragment : Fragment() {
 
     private lateinit var viewedUserId: String
     private lateinit var currentUserId: String
+
     private val db = FirebaseFirestore.getInstance()
 
     companion object {
@@ -47,10 +48,9 @@ class OtherUserProfileFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_other_user_profile, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_other_user_profile, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -58,6 +58,7 @@ class OtherUserProfileFragment : Fragment() {
         viewedUserId = arguments?.getString("username") ?: return
         currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
+        // UI 바인딩
         profileImage = view.findViewById(R.id.profileImage)
         usernameText = view.findViewById(R.id.usernameText)
         followButton = view.findViewById(R.id.followButton)
@@ -74,6 +75,7 @@ class OtherUserProfileFragment : Fragment() {
         diaryRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         archiveRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        // 어댑터 설정
         diaryAdapter = DiaryAdapter(diaryList, onItemClick = { diaryItem ->
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, DiaryDetailFragment(diaryItem))
@@ -86,25 +88,22 @@ class OtherUserProfileFragment : Fragment() {
                 val bundle = Bundle().apply {
                     putSerializable("playlist", playlist)
                     putString("origin", "archive")
+                    putString("viewedUserId", viewedUserId)
                 }
                 parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, ViewPlaylistFragment().apply {
-                        arguments = bundle
-                    })
+                    .replace(R.id.fragment_container, ViewPlaylistFragment().apply { arguments = bundle })
                     .addToBackStack(null)
                     .commit()
             },
-            onItemLongClick = { playlist ->
-                Toast.makeText(requireContext(), "길게 누름: ${playlist.title}", Toast.LENGTH_SHORT).show()
+            onItemLongClick = {
+                Toast.makeText(requireContext(), "길게 누름: ${it.title}", Toast.LENGTH_SHORT).show()
             })
 
         diaryRecyclerView.adapter = diaryAdapter
         archiveRecyclerView.adapter = playlistAdapter
 
-        backButton.setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-
+        // 버튼 이벤트
+        backButton.setOnClickListener { parentFragmentManager.popBackStack() }
         followButton.setOnClickListener { toggleFollow() }
         followersText.setOnClickListener { showUserList("followers") }
         followingText.setOnClickListener { showUserList("following") }
@@ -112,36 +111,35 @@ class OtherUserProfileFragment : Fragment() {
         diaryTabButton.setOnClickListener {
             diaryRecyclerView.visibility = View.VISIBLE
             archiveRecyclerView.visibility = View.GONE
-            diaryTabButton.isEnabled = false
-            archiveTabButton.isEnabled = true
         }
 
         archiveTabButton.setOnClickListener {
             diaryRecyclerView.visibility = View.GONE
             archiveRecyclerView.visibility = View.VISIBLE
-            diaryTabButton.isEnabled = true
-            archiveTabButton.isEnabled = false
+            loadPlaylists()
         }
 
+        // 데이터 로드
         loadUserInfo()
         loadDiaryList()
-        loadPlaylists()
         checkFollowState()
-        fetchViewedUserIdAndCount()
+        fetchViewedUserFollowCounts()
 
-        diaryTabButton.performClick()
+        // 탭 자동 선택
+        val selectedTab = arguments?.getString("selectedTab")
+        if (selectedTab == "archive") {
+            archiveTabButton.performClick()
+        } else {
+            diaryTabButton.performClick()
+        }
     }
 
     private fun loadUserInfo() {
-        db.collection("users")
-            .whereEqualTo("username", viewedUserId)
-            .get()
+        db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
-                if (!result.isEmpty) {
-                    val doc = result.documents[0]
+                result.firstOrNull()?.let { doc ->
                     usernameText.text = doc.getString("username") ?: ""
-                    val imageUrl = doc.getString("profileImageUrl")
-                    if (!imageUrl.isNullOrEmpty()) {
+                    doc.getString("profileImageUrl")?.let { imageUrl ->
                         Glide.with(this).load(imageUrl).circleCrop().into(profileImage)
                     }
                 }
@@ -149,21 +147,18 @@ class OtherUserProfileFragment : Fragment() {
     }
 
     private fun loadDiaryList() {
-        db.collection("users")
-            .whereEqualTo("username", viewedUserId)
-            .get()
+        db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
-                if (!result.isEmpty) {
-                    val userDocId = result.documents[0].id
+                result.firstOrNull()?.let { userDoc ->
+                    val userDocId = userDoc.id
                     db.collection("users").document(userDocId)
-                        .collection("diaries")
-                        .get()
+                        .collection("diaries").get()
                         .addOnSuccessListener { diaryResult ->
                             diaryList.clear()
-                            for (doc in diaryResult) {
-                                val diary = doc.toObject(DiaryItem::class.java)
-                                if (diary.isPublic == true) diaryList.add(diary)
-                            }
+                            diaryList.addAll(
+                                diaryResult.mapNotNull { it.toObject(DiaryItem::class.java) }
+                                    .filter { it.isPublic == true }
+                            )
                             postCountText.text = "게시물 ${diaryList.size}"
                             diaryAdapter.notifyDataSetChanged()
                         }
@@ -172,21 +167,15 @@ class OtherUserProfileFragment : Fragment() {
     }
 
     private fun loadPlaylists() {
-        db.collection("users")
-            .whereEqualTo("username", viewedUserId)
-            .get()
+        db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
-                if (!result.isEmpty) {
-                    val userDocId = result.documents[0].id
+                result.firstOrNull()?.let { userDoc ->
+                    val userDocId = userDoc.id
                     db.collection("users").document(userDocId)
-                        .collection("playlists")
-                        .get()
+                        .collection("playlists").get()
                         .addOnSuccessListener { playlistResult ->
                             playlistList.clear()
-                            for (doc in playlistResult) {
-                                val playlist = doc.toObject(Playlist::class.java)
-                                playlistList.add(playlist)
-                            }
+                            playlistList.addAll(playlistResult.mapNotNull { it.toObject(Playlist::class.java) })
                             playlistAdapter.notifyDataSetChanged()
                         }
                 }
@@ -194,12 +183,10 @@ class OtherUserProfileFragment : Fragment() {
     }
 
     private fun checkFollowState() {
-        db.collection("users")
-            .whereEqualTo("username", viewedUserId)
-            .get()
+        db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
-                if (!result.isEmpty) {
-                    val targetUid = result.documents[0].id
+                result.firstOrNull()?.let { targetUser ->
+                    val targetUid = targetUser.id
                     db.collection("users").document(currentUserId)
                         .collection("following").document(targetUid)
                         .get()
@@ -211,12 +198,10 @@ class OtherUserProfileFragment : Fragment() {
     }
 
     private fun toggleFollow() {
-        db.collection("users")
-            .whereEqualTo("username", viewedUserId)
-            .get()
+        db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
-                if (!result.isEmpty) {
-                    val targetUid = result.documents[0].id
+                result.firstOrNull()?.let { targetUser ->
+                    val targetUid = targetUser.id
                     val followingRef = db.collection("users").document(currentUserId)
                         .collection("following").document(targetUid)
                     val followerRef = db.collection("users").document(targetUid)
@@ -224,77 +209,73 @@ class OtherUserProfileFragment : Fragment() {
 
                     if (followButton.text == "팔로우") {
                         db.collection("users").document(currentUserId).get()
-                            .addOnSuccessListener { currentUserDoc ->
-                                val currentUsername = currentUserDoc.getString("username") ?: ""
-                                val currentEmail = currentUserDoc.getString("email") ?: ""
-                                val currentProfileImageUrl = currentUserDoc.getString("profileImageUrl")
-                                db.collection("users").document(targetUid).get()
-                                    .addOnSuccessListener { targetUserDoc ->
-                                        val targetUsername = targetUserDoc.getString("username") ?: ""
-                                        val targetEmail = targetUserDoc.getString("email") ?: ""
-                                        val targetProfileImageUrl = targetUserDoc.getString("profileImageUrl")
+                            .addOnSuccessListener { currentDoc ->
+                                val currentUsername = currentDoc.getString("username") ?: ""
+                                val currentEmail = currentDoc.getString("email") ?: ""
+                                val currentProfileImageUrl = currentDoc.getString("profileImageUrl")
 
-                                        followingRef.set(
-                                            mapOf(
-                                                "username" to targetUsername,
-                                                "email" to targetEmail,
-                                                "profileImageUrl" to targetProfileImageUrl
-                                            )
-                                        )
+                                followerRef.set(
+                                    mapOf(
+                                        "username" to currentUsername,
+                                        "email" to currentEmail,
+                                        "profileImageUrl" to currentProfileImageUrl
+                                    )
+                                )
 
-                                        followerRef.set(
-                                            mapOf(
-                                                "username" to currentUsername,
-                                                "email" to currentEmail,
-                                                "profileImageUrl" to currentProfileImageUrl
-                                            )
-                                        )
+                                val targetUsername = targetUser.getString("username") ?: ""
+                                val targetEmail = targetUser.getString("email") ?: ""
+                                val targetProfileImageUrl = targetUser.getString("profileImageUrl")
 
-                                        followButton.text = "팔로잉"
-                                        updateFollowCounts(targetUid)
-                                    }
+                                followingRef.set(
+                                    mapOf(
+                                        "username" to targetUsername,
+                                        "email" to targetEmail,
+                                        "profileImageUrl" to targetProfileImageUrl
+                                    )
+                                )
+
+                                followButton.text = "팔로잉"
+                                fetchViewedUserFollowCounts()
                             }
                     } else {
                         followingRef.delete()
                         followerRef.delete()
                         followButton.text = "팔로우"
-                        updateFollowCounts(targetUid)
+                        fetchViewedUserFollowCounts()
                     }
                 }
             }
     }
 
-    private fun updateFollowCounts(userId: String) {
-        val userRef = db.collection("users").document(userId)
-        userRef.collection("followers").get()
-            .addOnSuccessListener { followersSnapshot ->
-                followersText.text = "팔로워 ${followersSnapshot.size()}"
-            }
-        userRef.collection("following").get()
-            .addOnSuccessListener { followingSnapshot ->
-                followingText.text = "팔로잉 ${followingSnapshot.size()}"
+    private fun fetchViewedUserFollowCounts() {
+        db.collection("users").whereEqualTo("username", viewedUserId).get()
+            .addOnSuccessListener { result ->
+                result.firstOrNull()?.let { userDoc ->
+                    val userId = userDoc.id
+                    val userRef = db.collection("users").document(userId)
+                    userRef.collection("followers").get()
+                        .addOnSuccessListener { snapshot ->
+                            followersText.text = "팔로워 ${snapshot.size()}"
+                        }
+                    userRef.collection("following").get()
+                        .addOnSuccessListener { snapshot ->
+                            followingText.text = "팔로잉 ${snapshot.size()}"
+                        }
+                }
             }
     }
 
     private fun showUserList(type: String) {
-        val username = viewedUserId ?: return  // null이면 그냥 리턴
-
-        db.collection("users")
-            .whereEqualTo("username", username)
-            .get()
+        db.collection("users").whereEqualTo("username", viewedUserId).get()
             .addOnSuccessListener { result ->
-                if (!result.isEmpty) {
-                    val targetUid = result.documents[0].id
-                    val fragment: Fragment = when (type) {
+                result.firstOrNull()?.let { targetUser ->
+                    val targetUid = targetUser.id
+                    val fragment = when (type) {
                         "followers" -> FollowersListFragment().apply {
-                            arguments = Bundle().apply {
-                                putString("userId", targetUid)
-                            }
+                            arguments = Bundle().apply { putString("userId", targetUid) }
                         }
                         "following" -> FollowingListFragment().apply {
-                            arguments = Bundle().apply {
-                                putString("userId", targetUid)
-                            }
+                            arguments = Bundle().apply { putString("userId", targetUid) }
                         }
                         else -> return@addOnSuccessListener
                     }
@@ -303,23 +284,6 @@ class OtherUserProfileFragment : Fragment() {
                         .replace(R.id.fragment_container, fragment)
                         .addToBackStack(null)
                         .commit()
-                }
-            }
-            .addOnFailureListener {
-                // 실패했을 때 로그나 에러 처리도 추가 가능
-            }
-    }
-
-
-
-    private fun fetchViewedUserIdAndCount() {
-        db.collection("users")
-            .whereEqualTo("username", viewedUserId)
-            .get()
-            .addOnSuccessListener { result ->
-                if (!result.isEmpty) {
-                    val targetUid = result.documents[0].id
-                    updateFollowCounts(targetUid)
                 }
             }
     }

@@ -19,10 +19,12 @@ class ViewPlaylistFragment : Fragment() {
 
     private lateinit var adapter: AlbumAdapter
     private var origin: String? = null
+    private var userId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         origin = arguments?.getString("origin")
+        userId = arguments?.getString("userId")
     }
 
     override fun onCreateView(
@@ -79,22 +81,29 @@ class ViewPlaylistFragment : Fragment() {
         showPlaylistView.adapter = adapter
 
         goBackbtn.setOnClickListener {
-            val origin = arguments?.getString("origin")
+            val viewedUserId = arguments?.getString("viewedUserId")
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
-            if (origin == "archive") {
-                // 프로필 프래그먼트를 새로 만들되, 보관함 탭을 선택한 상태로 전달
-                val profileFragment = ProfileFragment().apply {
+            if (viewedUserId != null && viewedUserId != currentUserId) {
+                // 다른 사람 프로필로 돌아가기
+                val fragment = OtherUserProfileFragment.newInstance(viewedUserId)
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .commit()
+            } else {
+                // 내 프로필로 돌아가기 + 보관함 탭 유지
+                val fragment = ProfileFragment().apply {
                     arguments = Bundle().apply {
                         putString("selectedTab", "archive")
+                        putString("userId", currentUserId)
                     }
                 }
                 parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, profileFragment)
+                    .replace(R.id.fragment_container, fragment)
                     .commit()
-            } else {
-                requireActivity().supportFragmentManager.popBackStack()
             }
         }
+
 
     }
     fun deleteAlbum(userId: String, playlistTitle: String, album: Album, onComplete: () -> Unit) {
