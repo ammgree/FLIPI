@@ -65,6 +65,7 @@ class StoreFragment : Fragment() {
                 } else {
                     val bundle = Bundle().apply {
                         putSerializable("playlist", selectedPlaylist)
+                        putString("origin", "store")
                     }
                     requireActivity().supportFragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, ViewPlaylistFragment().apply {

@@ -99,25 +99,39 @@ class ViewPlaylistFragment : Fragment() {
             val viewedUserId = arguments?.getString("viewedUserId")
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
-            if (viewedUserId != null && viewedUserId != currentUserId) {
-                // 다른 사람 프로필로 돌아가기
-                val fragment = OtherUserProfileFragment.newInstance(viewedUserId)
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .commit()
-            } else {
-                // 내 프로필로 돌아가기 + 보관함 탭 유지
-                val fragment = ProfileFragment().apply {
-                    arguments = Bundle().apply {
-                        putString("selectedTab", "archive")
-                        putString("userId", currentUserId)
+            when (origin) {
+                "store" -> {
+                    // 스토어에서 들어온 경우 → StoreFragment로 돌아가기
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, StoreFragment())
+                        .commit()
+                }
+                "FocusTimer" -> {
+                    // 포커스타이머에서 들어온 경우 → 이전 프래그먼트로 단순 백스택 pop
+                    parentFragmentManager.popBackStack()
+                }
+                else -> {
+                    // 프로필에서 들어온 경우 (내 프로필 or 다른 사람 프로필)
+                    if (viewedUserId != null && viewedUserId != currentUserId) {
+                        val fragment = OtherUserProfileFragment.newInstance(viewedUserId)
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, fragment)
+                            .commit()
+                    } else {
+                        val fragment = ProfileFragment().apply {
+                            arguments = Bundle().apply {
+                                putString("selectedTab", "archive")
+                                putString("userId", currentUserId)
+                            }
+                        }
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, fragment)
+                            .commit()
                     }
                 }
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .commit()
             }
         }
+
 
 
     }

@@ -85,6 +85,12 @@ class SettingFragment : Fragment(R.layout.fragment_setting) {
         }
 
         saveButton.setOnClickListener {
+            val newName = usernameEditText.text.toString().trim()
+            if (newName.isEmpty()) {
+                Toast.makeText(context, "사용자 이름을 입력해주세요", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             if (passwordConfirmed) {
                 val newPw = newPwEditText.text.toString()
                 val confirmPw = confirmPwEditText.text.toString()
@@ -107,6 +113,7 @@ class SettingFragment : Fragment(R.layout.fragment_setting) {
                 uploadProfileAndUsername()
             }
         }
+
 
         logoutText.setOnClickListener {
             AlertDialog.Builder(requireContext())
