@@ -4,10 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class Mood : AppCompatActivity() {
 
@@ -51,9 +54,23 @@ class Mood : AppCompatActivity() {
     }
 
     private fun openHome(mood : String, username : String){
-        val intent = Intent(this,MainActivity::class.java)
-        intent.putExtra("mood", mood)
-        intent.putExtra("username", username)
-        startActivity(intent)
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid != null) {
+            val db = FirebaseFirestore.getInstance()
+
+            db.collection("users").document(uid)
+                .update("mood", mood)
+                .addOnSuccessListener {
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.putExtra("mood", mood)
+                    intent.putExtra("username", username)
+                    startActivity(intent)
+                    finish()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Mood 저장 실패 ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        } else
+            Toast.makeText(this, "로그인 정보가 없습니다.",Toast.LENGTH_SHORT).show()
     }
 }

@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -64,6 +65,10 @@ class SettingFragment : Fragment(R.layout.fragment_setting) {
 
         checkPwButton.setOnClickListener {
             val password = currentPwEditText.text.toString()
+            if (password.isEmpty()) {
+                Toast.makeText(context, "비밀번호를 입력해주세요",Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             val email = auth.currentUser?.email ?: return@setOnClickListener
             val credential = EmailAuthProvider.getCredential(email, password)
 

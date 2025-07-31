@@ -49,22 +49,12 @@ data class StoryItem(
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
-    private lateinit var storyRecyclerView: RecyclerView
     private val db = FirebaseFirestore.getInstance()
-
-    private val storyList = mutableListOf<StoryItem>()
-
-
-
 
     private var weatherApiKey: String = ""
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var weatherTextView: TextView
-
-
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

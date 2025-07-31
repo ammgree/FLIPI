@@ -55,10 +55,12 @@ class Login : AppCompatActivity() {
                     docRef.get().addOnSuccessListener { document->
                         if(document != null && document.exists()){
                             val username = document.getString("username")
+                            val mood = document.getString("mood")
                             Toast.makeText(this, "로그인 성공: $username", Toast.LENGTH_SHORT).show()
                             //다음 화면, 기분 묻는 화면으로 전환
                             val intent = Intent(this, Mood::class.java)
                             intent.putExtra("username", username)
+                            intent.putExtra("mood", mood)
                             startActivity(intent)
                             finish()
                         }
@@ -66,8 +68,9 @@ class Login : AppCompatActivity() {
                             Toast.makeText(this, "사용자 정보 없음", Toast.LENGTH_SHORT).show()
                         }
                     }
-                        .addOnFailureListener{e->
-                            Toast.makeText(this, "Firestore 오류: ${e.message}", Toast.LENGTH_SHORT).show() }
+                        .addOnFailureListener{ e->
+                            Toast.makeText(this, "Firestore 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                 }
                 else{
                     Toast.makeText(this, "로그인 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()

@@ -97,7 +97,8 @@ class Register : AppCompatActivity() {
             "username" to username,
             "email" to userEmail,
             "password" to userPw,
-            "profileImageUrl" to imageUrl
+            "profileImageUrl" to imageUrl,
+            "mood" to ""
         )
         val uid = auth.currentUser?.uid
         if (uid != null) {
