@@ -197,6 +197,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val jsonArray = jsonResponse.getJSONArray("results")
 
         val madeMap = mutableMapOf<String, Album>()
+        // 앨범 객체로 만들기
         for (i in 0 until jsonArray.length()) {
             val item = jsonArray.getJSONObject(i)
             var id = item.optString("collectionId")

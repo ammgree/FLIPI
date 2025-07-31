@@ -57,6 +57,7 @@ class AlbumAdapter(
             itemView.setOnClickListener {
                 onClick(album)
             }
+            // 아이템 길게 누르기
             itemView.setOnLongClickListener {
                 onItemLongClick(album)
                 true
@@ -81,6 +82,7 @@ class AlbumAdapter(
     // 전체 몇 개의 데이터를 보여줘야하는지 recyclerView가 알 수 있음
     override fun getItemCount(): Int = albumList.size
 
+    // 고른 노래와 현재 노래가 다르면 바꿔주기
     fun selectAlbum(album:Album){
         if(selectedAlbum != album)
             selectedAlbum = album

@@ -47,12 +47,14 @@ class ViewSongFragment : Fragment() {
         val previous = view.findViewById<ImageButton>(R.id.skip_previous)
         val next = view.findViewById<ImageButton>(R.id.skip_next)
 
+        // ViewPlaylistFragment에서 정보 얻기
         val playlist = arguments?.getSerializable("playlist") as? Playlist
         val album = arguments?.getSerializable("selectedAlbum") as? Album
 
         MusicPlayerManager.addOnPlayPauseChangeListener(playPauseListener)
 
         playlist?.let {
+            // 현재 노래가 플리의 몇번째인지 기억하고 재생하기
             itplaylist = it
             itsonglist = it.songs
             currentIndex = itsonglist.indexOfFirst { it.title == album?.title }
@@ -60,20 +62,21 @@ class ViewSongFragment : Fragment() {
 
             updateSongUI(itsonglist[currentIndex])
 
+            // 이전 노래
             previous.setOnClickListener {
                 currentIndex = if (currentIndex == 0) itsonglist.size - 1 else currentIndex - 1
                 updateSongUI(itsonglist[currentIndex])
             }
-
+            // 다음 노래
             next.setOnClickListener {
                 currentIndex = if (currentIndex == itsonglist.size - 1) 0 else currentIndex + 1
                 updateSongUI(itsonglist[currentIndex])
             }
-
+            // 재생
             playButton.setOnClickListener {
                 MusicPlayerManager.resume()
             }
-
+            // 정지
             pauseButton.setOnClickListener {
                 MusicPlayerManager.pause()
             }
@@ -86,7 +89,7 @@ class ViewSongFragment : Fragment() {
                 }
             }
         }
-
+        // 전으로 이동 버튼
         goBackbtn.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
@@ -103,7 +106,7 @@ class ViewSongFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // ✅ 리스너 해제
+        // 리스너 해제
         MusicPlayerManager.removeOnPlayPauseChangeListener(playPauseListener)
     }
 }

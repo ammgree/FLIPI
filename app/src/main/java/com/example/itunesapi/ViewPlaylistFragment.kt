@@ -49,6 +49,7 @@ class ViewPlaylistFragment : Fragment() {
 
         adapter = AlbumAdapter(albumList = playlist!!.songs, { album ->
             if (origin == "FocusTimer") {
+                // FocusTimerFragment에 정보 전달
                 val subject = arguments?.getString("subject") ?: "기본"
                 val resultBundle = Bundle().apply {
                     putParcelable("album", album)
@@ -61,6 +62,7 @@ class ViewPlaylistFragment : Fragment() {
                     .addToBackStack(null)
                     .commit()
             } else {
+                // ViewSongFragment에 정보 전달
                 adapter.selectAlbum(album)
                 adapter.selectedAlbum?.let { album ->
                     MusicPlayerManager.play(album)

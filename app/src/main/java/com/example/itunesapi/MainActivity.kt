@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         val mood = intent.getStringExtra("mood")
         val username = intent.getStringExtra("username")
 
+        // 현재 유저 닉네임과 그 날의 기분 연결
         if(savedInstanceState == null && mood != null && username != null) {
             val homeFragment = HomeFragment().apply {
                 arguments = Bundle().apply {
@@ -42,11 +43,11 @@ class MainActivity : AppCompatActivity() {
                 .commit()
         }
 
-
         val currentSong = findViewById<ConstraintLayout>(R.id.currentSong)
         val songAlbum = findViewById<ImageView>(R.id.songAlbum)
         val songTitle = findViewById<TextView>(R.id.songTitle)
 
+        // 노래 시작 & 정지 버튼
         val playButton = findViewById<ImageButton>(R.id.play)
         val pauseButton = findViewById<ImageButton>(R.id.pause)
 

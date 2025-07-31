@@ -20,7 +20,6 @@ class EditPlaylistFragment : Fragment() {
     private lateinit var saveButton: Button
     val mysongPlaylist = Playlist("", "")
 
-
     private lateinit var song : Album
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +34,7 @@ class EditPlaylistFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_edit_playlist, container, false)
     }
 
+    // 새 플레이리스트 만들기
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

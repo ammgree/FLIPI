@@ -55,6 +55,8 @@ class SearchFragment : Fragment() {
         adapter = AlbumAdapter(
             albumList,
             onItemClick = { album ->
+                // 노래 클릭 시 고른 노래 기억하고 + 버튼 보이기
+                // 플레이리스트에 추가 가능
                 adapter.selectAlbum(album)
                 addButton.visibility = View.VISIBLE
                 adapter.selectedAlbum?.let { MusicPlayerManager.play(it) }
@@ -71,8 +73,6 @@ class SearchFragment : Fragment() {
                 }
             }
         )
-
-
 
         recyclerView.adapter = adapter
 
@@ -114,8 +114,6 @@ class SearchFragment : Fragment() {
                     } else {
                         "$baseUrl&term=$term"
                     }
-
-
 
 
                     Log.d("iTunesAPI", "요청 URL: $urlSong")
@@ -179,10 +177,7 @@ class SearchFragment : Fragment() {
                             val others = allResults - exact - word - partial
                             exact + word + partial + others.sortedBy { it.artist }
                         }
-
-
                     }
-
 
                     // 여기서부터 UI 스레드에서 처리
                     activity?.runOnUiThread {
@@ -203,7 +198,7 @@ class SearchFragment : Fragment() {
         }
 
 
-        // 노래 추가 버튼 팝업
+        // 플리에 노래 추가 버튼 팝업
         addButton.setOnClickListener { view ->
             val popup = PopupMenu(requireContext(), view)
             popup.menuInflater.inflate(R.menu.add_song, popup.menu)
@@ -274,7 +269,6 @@ class SearchFragment : Fragment() {
                     else -> false
                 }
             }
-
             popup.show()
         }
     }
@@ -326,7 +320,6 @@ class SearchFragment : Fragment() {
         } catch (e: Exception) {
             Log.e("iTunesAPI", "오류 발생: $e")
         }
-
         return madeMap
     }
 }
