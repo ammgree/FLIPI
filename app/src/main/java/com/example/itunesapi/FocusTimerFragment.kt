@@ -96,6 +96,7 @@ class FocusTimerFragment : Fragment() {
 
     private fun setupViews() {
         binding.btnMusic.setOnClickListener {
+            stopMusic()
             val storeFragment = StoreFragment()
             storeFragment.arguments = Bundle().apply {
                 putString("origin", "FocusTimer")
@@ -108,6 +109,7 @@ class FocusTimerFragment : Fragment() {
         }
 
         binding.btnPrev.setOnClickListener {
+            stopMusic()
             if (playlist.isNotEmpty()) {
                 currentIndex = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
                 updateAndPlayCurrentSong()
@@ -115,6 +117,7 @@ class FocusTimerFragment : Fragment() {
         }
 
         binding.btnNext.setOnClickListener {
+            stopMusic()
             if (playlist.isNotEmpty()) {
                 currentIndex = (currentIndex + 1) % playlist.size
                 updateAndPlayCurrentSong()
@@ -123,20 +126,10 @@ class FocusTimerFragment : Fragment() {
     }
 
     private fun updateAndPlayCurrentSong() {
-        val song = playlist[currentIndex]
-        musicUrl = song.songUrl
-        subjectName = song.title
-
-        // UI 업데이트
-        binding.currentMusicBox.visibility = View.VISIBLE
-        binding.tvCurrentMusicTitle.text = "재생 중: ${song.title} - ${song.artist}"
-        Glide.with(this)
-            .load(song.imageUrl)
-            .placeholder(R.drawable.music_note)
-            .into(binding.albumArt)
-
-        stopMusic()
-        playMusic()
+        if (playlist.isNotEmpty()) {
+            val song = playlist[currentIndex]
+            selectAndPlaySong(song)
+        }
     }
 
     private fun startTimer() {
@@ -160,7 +153,10 @@ class FocusTimerFragment : Fragment() {
     }
 
     private fun playMusic() {
-        if (musicUrl.isBlank()) return
+        if (musicUrl.isBlank()) {
+            Toast.makeText(requireContext(),"음악 URL이 비어있습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         mediaPlayer = MediaPlayer().apply {
             setAudioStreamType(AudioManager.STREAM_MUSIC)
@@ -175,7 +171,14 @@ class FocusTimerFragment : Fragment() {
     }
 
     private fun stopMusic() {
-        MusicPlayerManager.stop()
+        mediaPlayer?.let {
+            if (it.isPlaying) {
+                it.stop()
+            }
+            it.reset()
+            it.release()
+        }
+        mediaPlayer = null
     }
 
     private fun stopTimer() {
@@ -210,24 +213,30 @@ class FocusTimerFragment : Fragment() {
             "songSelected",
             viewLifecycleOwner
         ) { _, bundle ->
+            val selectedSong = bundle.getParcelable<Album>("album")
+            val selectedPlaylist = bundle.getSerializable("playlist") as? Playlist
 
-            val getSong = bundle.getParcelable<Album>("album")
-//val getPlaylist = bundle.getSerializable("playlist") as List<Album>
-            val playlist = bundle.getSerializable("playlist") as Playlist
-            val getPlaylist: List<Album> = playlist.songs
-            this.playlist = getPlaylist
-
-            binding.currentMusicBox.visibility = View.VISIBLE
-            binding.tvCurrentMusicTitle.text = "재생 중: ${getSong?.title} - ${getSong?.artist}"
-
-            Glide.with(this)
-                .load(getSong?.imageUrl)
-                .placeholder(R.drawable.music_note)
-                .into(binding.albumArt)
-
-            stopMusic()
-            playMusic()
+            if (selectedSong != null && selectedPlaylist != null) {
+                playlist = selectedPlaylist.songs
+                currentIndex = playlist.indexOfFirst { it == selectedSong }.coerceAtLeast(0)
+                selectAndPlaySong(selectedSong)
+            }
         }
         setupViews()
+    }
+    private fun selectAndPlaySong(song : Album) {
+        musicUrl = song.songUrl
+        subjectName = song.title
+
+        binding.currentMusicBox.visibility = View.VISIBLE
+        binding.tvCurrentMusicTitle.text = "재생 중: ${song.title} - ${song.artist}"
+
+        Glide.with(this)
+            .load(song.imageUrl)
+            .placeholder(R.drawable.music_note)
+            .into(binding.albumArt)
+
+        stopMusic()
+        playMusic()
     }
 }

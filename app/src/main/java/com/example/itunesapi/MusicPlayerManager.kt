@@ -23,6 +23,7 @@ object MusicPlayerManager {
     }
 
     fun play(album: Album) {
+        stop()
         song = album
         mediaPlayer?.release()
         mediaPlayer = MediaPlayer().apply {

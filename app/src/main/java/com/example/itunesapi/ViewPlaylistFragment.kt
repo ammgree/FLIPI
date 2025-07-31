@@ -48,11 +48,6 @@ class ViewPlaylistFragment : Fragment() {
         showPlaylistView.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = AlbumAdapter(albumList = playlist!!.songs, { album ->
-            adapter.selectAlbum(album)
-            adapter.selectedAlbum?.let { album ->
-                MusicPlayerManager.play(album)
-            }
-
             if (origin == "FocusTimer") {
                 val subject = arguments?.getString("subject") ?: "기본"
                 val resultBundle = Bundle().apply {
@@ -66,6 +61,10 @@ class ViewPlaylistFragment : Fragment() {
                     .addToBackStack(null)
                     .commit()
             } else {
+                adapter.selectAlbum(album)
+                adapter.selectedAlbum?.let { album ->
+                    MusicPlayerManager.play(album)
+                }
                 val bundle = Bundle().apply {
                     putSerializable("playlist", playlist)
                     putSerializable("selectedAlbum", adapter.selectedAlbum)
